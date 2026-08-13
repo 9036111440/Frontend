@@ -17,7 +17,7 @@ import { Auth, RegisterRequest } from '../services/auth';
 
 @Component({
   selector: 'app-register',
- standalone: true,
+  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -29,10 +29,15 @@ import { Auth, RegisterRequest } from '../services/auth';
   styleUrl: './register.scss',
 })
 export class Register {
-  
- registerForm: FormGroup;
+
+  registerForm: FormGroup;
 
   isLoading = false;
+  emailOtpSent = false;
+  emailVerified = false;
+  isSendingOtp = false;
+  isVerifyingOtp = false;
+  verificationToken = '';
 
   constructor(
     private fb: FormBuilder,
@@ -75,6 +80,13 @@ export class Register {
             )
           ]
         ],
+        otp: [
+          '',
+          [
+            Validators.required,
+            Validators.pattern(/^\d{6}$/)
+          ]
+        ],
 
         confirmPassword: [
           '',
@@ -113,67 +125,275 @@ export class Register {
   }
 
 
-  submit(): void {
+submit(): void {
+
+    if (!this.emailVerified) {
+
+        alert(
+            'Please verify your email before registering'
+        );
+
+        return;
+
+    }
+
 
     if (this.registerForm.invalid) {
 
-      this.registerForm.markAllAsTouched();
+        this.registerForm.markAllAsTouched();
 
-      return;
+        return;
+
     }
 
-    const formData: RegisterRequest =
-      this.registerForm.value;
 
-    console.log('Sending data:', formData);
+    const formValue =
+        this.registerForm.getRawValue();
+
+
+    const formData: RegisterRequest = {
+
+        firstName:
+            formValue.firstName,
+
+        lastName:
+            formValue.lastName,
+
+        email:
+            formValue.email,
+
+        password:
+            formValue.password,
+
+        confirmPassword:
+            formValue.confirmPassword,
+
+        verificationToken:
+            this.verificationToken
+
+    };
+
 
     this.isLoading = true;
 
-    this.authService.register(formData)
-      .subscribe({
 
-        next: (response:any) => {
+    this.authService
+        .register(formData)
+        .subscribe({
 
-          console.log(
-            'Registration successful:',
-            response
-          );
+            next: (response) => {
 
-          this.isLoading = false;
+                this.isLoading = false;
 
-          alert('Registration successful!');
+                console.log(
+                    'Registration successful:',
+                    response
+                );
 
-          this.registerForm.reset();
-        },
+                alert(
+                    'Registration successful!'
+                );
 
-        error: (error:any) => {
+                this.registerForm.reset();
 
-          console.error(
-            'Registration failed:',
-            error
-          );
+                this.emailOtpSent = false;
 
-          this.isLoading = false;
+                this.emailVerified = false;
 
-          if (error.status === 409) {
+                this.verificationToken = '';
 
-            alert('Email already registered');
+            },
 
-          } else if (error.status === 400) {
 
-            alert(
-              error.error?.message ||
-              'Invalid registration details'
-            );
+            error: (error) => {
 
-          } else {
+                this.isLoading = false;
 
-            alert(
-              'Something went wrong. Please try again.'
-            );
-          }
-        }
+                console.error(
+                    'Registration failed:',
+                    error
+                );
 
-      });
-  }
+                alert(
+                    error.error?.message ||
+                    'Registration failed'
+                );
+
+            }
+
+        });
+
+}
+
+  sendOtp(): void {
+
+    const emailControl =
+        this.registerForm.get('email');
+
+
+    if (
+        !emailControl ||
+        emailControl.invalid
+    ) {
+
+        emailControl?.markAsTouched();
+
+        return;
+
+    }
+
+
+    const email =
+        emailControl.value;
+
+
+    this.isSendingOtp = true;
+
+
+    this.authService
+        .sendOtp(email)
+        .subscribe({
+
+            next: (response) => {
+
+                console.log(
+                    'OTP sent:',
+                    response
+                );
+
+                this.isSendingOtp = false;
+
+                this.emailOtpSent = true;
+
+                this.emailVerified = false;
+
+                alert(
+                    'OTP sent to your email'
+                );
+
+            },
+
+            error: (error) => {
+
+                console.error(
+                    'Send OTP failed:',
+                    error
+                );
+
+                this.isSendingOtp = false;
+
+                alert(
+                    error.error?.message ||
+                    'Failed to send OTP'
+                );
+
+            }
+
+        });
+
+}
+
+verifyOtp(): void {
+
+    const emailControl =
+        this.registerForm.get('email');
+
+    const otpControl =
+        this.registerForm.get('otp');
+
+
+    if (
+        !emailControl ||
+        emailControl.invalid
+    ) {
+
+        emailControl?.markAsTouched();
+
+        return;
+
+    }
+
+
+    if (
+        !otpControl ||
+        otpControl.invalid
+    ) {
+
+        otpControl?.markAsTouched();
+
+        return;
+
+    }
+
+
+    const email =
+        emailControl.value;
+
+    const otp =
+        otpControl.value;
+
+
+    this.isVerifyingOtp = true;
+
+
+    this.authService
+        .verifyOtp(email, otp)
+        .subscribe({
+
+            next: (response) => {
+
+                console.log(
+                    'OTP verified:',
+                    response
+                );
+
+
+                this.isVerifyingOtp = false;
+
+                this.emailVerified = true;
+
+                this.verificationToken =
+                    response.verificationToken;
+
+
+                this.registerForm
+                    .get('email')
+                    ?.disable();
+
+
+                this.registerForm
+                    .get('otp')
+                    ?.disable();
+
+
+                alert(
+                    'Email verified successfully!'
+                );
+
+            },
+
+
+            error: (error) => {
+
+                console.error(
+                    'OTP verification failed:',
+                    error
+                );
+
+
+                this.isVerifyingOtp = false;
+
+                this.emailVerified = false;
+
+
+                alert(
+                    error.error?.message ||
+                    'Invalid OTP'
+                );
+
+            }
+
+        });
+
+}
 }

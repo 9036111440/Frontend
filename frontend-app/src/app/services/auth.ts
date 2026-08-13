@@ -8,6 +8,7 @@ export interface RegisterRequest {
   email: string;
   password: string;
   confirmPassword: string;
+  verificationToken: string;
 }
 
 export interface RegisterResponse {
@@ -27,6 +28,33 @@ export class Auth {
   private readonly apiUrl = 'http://localhost:3000/api/auth';
 
   constructor(private http: HttpClient) {}
+
+  sendOtp(email: string): Observable<any> {
+
+    return this.http.post(
+      `${this.apiUrl}/send-otp`,
+      {
+        email
+      }
+    );
+
+  }
+
+
+  verifyOtp(
+    email: string,
+    otp: string
+  ): Observable<any> {
+
+    return this.http.post(
+      `${this.apiUrl}/verify-otp`,
+      {
+        email,
+        otp
+      }
+    );
+
+  }
 
   register(
     data: RegisterRequest

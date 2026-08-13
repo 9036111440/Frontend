@@ -40,3 +40,33 @@ h1 {
 
   margin-top: 4px;
 }
+
+.email-row,
+.otp-row {
+    display: flex;
+    gap: 8px;
+}
+
+.email-row input,
+.otp-row input {
+    flex: 1;
+}
+
+.email-row button,
+.otp-row button {
+    flex-shrink: 0;
+}
+
+.error {
+    display: block;
+    color: #ff4d4f;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.success {
+    display: block;
+    color: #52c41a;
+    font-size: 13px;
+    margin-top: 6px;
+}
