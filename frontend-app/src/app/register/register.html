@@ -1,0 +1,274 @@
+<div class="register-container">
+
+  <div class="register-card">
+
+    <h1>Create Account</h1>
+
+    <p class="subtitle">
+      Create your AI Chatbot account
+    </p>
+
+
+    <form
+      nz-form
+      [formGroup]="registerForm"
+      (ngSubmit)="submit()"
+      nzLayout="vertical"
+    >
+
+      <!-- First Name -->
+
+      <nz-form-item>
+
+        <nz-form-label nzRequired>
+          First Name
+        </nz-form-label>
+
+        <nz-form-control>
+
+          <input
+            nz-input
+            formControlName="firstName"
+            placeholder="Enter first name"
+          />
+
+          @if (
+            registerForm.get('firstName')?.touched &&
+            registerForm.get('firstName')?.hasError('required')
+          ) {
+
+            <span class="error">
+              First name is required
+            </span>
+
+          }
+
+          @if (
+            registerForm.get('firstName')?.touched &&
+            registerForm.get('firstName')?.hasError('minlength')
+          ) {
+
+            <span class="error">
+              First name must contain at least 2 characters
+            </span>
+
+          }
+
+        </nz-form-control>
+
+      </nz-form-item>
+
+
+      <!-- Last Name -->
+
+      <nz-form-item>
+
+        <nz-form-label nzRequired>
+          Last Name
+        </nz-form-label>
+
+        <nz-form-control>
+
+          <input
+            nz-input
+            formControlName="lastName"
+            placeholder="Enter last name"
+          />
+
+          @if (
+            registerForm.get('lastName')?.touched &&
+            registerForm.get('lastName')?.hasError('required')
+          ) {
+
+            <span class="error">
+              Last name is required
+            </span>
+
+          }
+
+          @if (
+            registerForm.get('lastName')?.touched &&
+            registerForm.get('lastName')?.hasError('minlength')
+          ) {
+
+            <span class="error">
+              Last name must contain at least 2 characters
+            </span>
+
+          }
+
+        </nz-form-control>
+
+      </nz-form-item>
+
+
+      <!-- Email -->
+
+      <nz-form-item>
+
+        <nz-form-label nzRequired>
+          Email
+        </nz-form-label>
+
+        <nz-form-control>
+
+          <input
+            nz-input
+            type="email"
+            formControlName="email"
+            placeholder="Enter email"
+          />
+
+          @if (
+            registerForm.get('email')?.touched &&
+            registerForm.get('email')?.hasError('required')
+          ) {
+
+            <span class="error">
+              Email is required
+            </span>
+
+          }
+
+          @if (
+            registerForm.get('email')?.touched &&
+            registerForm.get('email')?.hasError('email')
+          ) {
+
+            <span class="error">
+              Please enter a valid email
+            </span>
+
+          }
+
+        </nz-form-control>
+
+      </nz-form-item>
+
+
+      <!-- Password -->
+
+      <nz-form-item>
+
+        <nz-form-label nzRequired>
+          New Password
+        </nz-form-label>
+
+        <nz-form-control>
+
+          <input
+            nz-input
+            type="password"
+            formControlName="password"
+            placeholder="Enter password"
+          />
+
+          @if (
+            registerForm.get('password')?.touched &&
+            registerForm.get('password')?.hasError('required')
+          ) {
+
+            <span class="error">
+              Password is required
+            </span>
+
+          }
+
+          @if (
+            registerForm.get('password')?.touched &&
+            registerForm.get('password')?.hasError('minlength')
+          ) {
+
+            <span class="error">
+              Password must contain more than 8 characters
+            </span>
+
+          }
+
+          @if (
+            registerForm.get('password')?.touched &&
+            registerForm.get('password')?.hasError('pattern')
+          ) {
+
+            <span class="error">
+              Must contain uppercase, lowercase, number and special character
+            </span>
+
+          }
+
+        </nz-form-control>
+
+      </nz-form-item>
+
+
+      <!-- Confirm Password -->
+
+      <nz-form-item>
+
+        <nz-form-label nzRequired>
+          Confirm Password
+        </nz-form-label>
+
+        <nz-form-control>
+
+          <input
+            nz-input
+            type="password"
+            formControlName="confirmPassword"
+            placeholder="Confirm password"
+          />
+
+          @if (
+            registerForm.get('confirmPassword')?.touched &&
+            registerForm.get('confirmPassword')?.hasError('required')
+          ) {
+
+            <span class="error">
+              Confirm password is required
+            </span>
+
+          }
+
+          @if (
+            registerForm.get('confirmPassword')?.touched &&
+            registerForm.hasError('passwordMismatch')
+          ) {
+
+            <span class="error">
+              Passwords do not match
+            </span>
+
+          }
+
+        </nz-form-control>
+
+      </nz-form-item>
+
+
+      <!-- Submit -->
+
+      <nz-form-item>
+
+        <nz-form-control>
+
+          <button
+            nz-button
+            nzType="primary"
+            nzSize="large"
+            nzBlock
+            type="submit"
+            [nzLoading]="isLoading"
+            [disabled]="isLoading"
+          >
+            Create Account
+          </button>
+
+        </nz-form-control>
+
+      </nz-form-item>
+
+    </form>
+
+  </div>
+
+</div>
