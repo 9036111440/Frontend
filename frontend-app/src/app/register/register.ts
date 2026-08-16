@@ -14,6 +14,7 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { Auth, RegisterRequest } from '../services/auth';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -23,7 +24,8 @@ import { Auth, RegisterRequest } from '../services/auth';
     ReactiveFormsModule,
     NzFormModule,
     NzInputModule,
-    NzButtonModule
+    NzButtonModule,
+    RouterLink
   ],
   templateUrl: './register.html',
   styleUrl: './register.scss',

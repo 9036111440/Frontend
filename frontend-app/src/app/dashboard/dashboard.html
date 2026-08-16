@@ -1,0 +1,150 @@
+<div class="chat-container">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>AI Chat</h2>
+      <button
+        nz-button
+        nzType="primary"
+        nzBlock
+        (click)="newChat()"
+      >
+        + New Chat
+      </button>
+    </div>
+
+    <div class="recent-title">
+      Recent Chats
+    </div>
+
+    <div class="conversation-list">
+      @for (conversation of conversations; track conversation.id) {
+        <button
+          class="conversation-item"
+          (click)="openConversation(conversation)"
+        >
+          <span class="conversation-title">
+            {{ conversation.title }}
+          </span>
+        </button>
+      }
+
+      @if (conversations.length === 0) {
+        <div class="empty-history">
+          No conversations yet.
+        </div>
+      }
+    </div>
+  </aside>
+
+  <!-- Main Chat -->
+  <main class="chat-main">
+
+    <!-- Header -->
+    <header class="chat-header">
+      <h2>AI Assistant</h2>
+    </header>
+
+    <!-- Messages -->
+    <div class="messages-container">
+      @if (messages.length === 0) {
+        <div class="welcome">
+          <h1>How can I help you?</h1>
+          <p>Ask me anything.</p>
+        </div>
+      }
+
+      @for (msg of messages; track $index) {
+        <div
+          class="message-row"
+          [class.user-message]="msg.role === 'user'"
+          [class.ai-message]="msg.role === 'assistant'"
+        >
+          <div class="avatar">
+            @if (msg.role === 'user') {
+              You
+            } @else {
+              AI
+            }
+          </div>
+
+          <div class="message-content">
+            {{ msg.content }}
+          </div>
+        </div>
+      }
+
+      <!-- Show Thinking indicator ONLY when loading and last message is from user -->
+      @if (isLoading && messages.length > 0 && messages[messages.length - 1]?.role === 'user') {
+        <div class="message-row ai-message">
+          <div class="avatar">AI</div>
+          <div class="message-content">
+            <span class="thinking">Thinking...</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Composer -->
+    <div class="composer-container">
+
+      <!-- Selected file -->
+      @if (selectedFile) {
+        <div class="selected-file">
+          <span>
+            📎 {{ selectedFile.name }}
+          </span>
+          <button
+            nz-button
+            nzType="text"
+            (click)="removeFile()"
+          >
+            ×
+          </button>
+        </div>
+      }
+
+      <div class="composer">
+
+        <!-- Attachment -->
+        <label
+          class="attachment-button"
+          title="Attach file"
+        >
+          📎
+          <input
+            type="file"
+            hidden
+            (change)="selectFile($event)"
+            accept="image/*,.pdf,.txt,.doc,.docx"
+          />
+        </label>
+
+        <!-- Text - FIXED: Use keyup.enter instead of keydown.enter -->
+        <textarea
+          nz-input
+          [(ngModel)]="message"
+          placeholder="Message AI..."
+          rows="1"
+          (keyup.enter)="sendMessage()"
+        ></textarea>
+
+        <!-- Send -->
+        <button
+          nz-button
+          nzType="primary"
+          [disabled]="
+            isLoading ||
+            (!message.trim() && !selectedFile)
+          "
+          (click)="sendMessage()"
+        >
+          Send
+        </button>
+
+      </div>
+    </div>
+
+  </main>
+</div>

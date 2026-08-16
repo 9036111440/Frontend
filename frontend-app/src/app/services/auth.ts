@@ -21,6 +21,37 @@ export interface RegisterResponse {
   };
 }
 
+export interface LoginRequest {
+
+    email: string;
+
+    password: string;
+
+}
+
+
+export interface LoginResponse {
+
+    message: string;
+
+    accessToken: string;
+
+    refreshToken: string;
+
+    user: {
+
+        id: string;
+
+        firstName: string;
+
+        lastName: string;
+
+        email: string;
+
+    };
+
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -65,4 +96,18 @@ export class Auth {
       data
     );
   }
+  
+  login(
+    data: LoginRequest
+): Observable<LoginResponse> {
+
+    return this.http.post<LoginResponse>(
+        `${this.apiUrl}/login`,
+        data,
+        {
+            withCredentials: true
+        }
+    );
+
+}
 }
