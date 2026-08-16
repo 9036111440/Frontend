@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../environments/environment';
 
 import {
   HttpClient,
@@ -15,7 +16,7 @@ import {
 })
 export class Chatservice {
   private apiUrl =
-    'http://localhost:3000/api/chat';
+    `${environment.apiUrl}/chat`;
 
 
   constructor(

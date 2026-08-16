@@ -9,6 +9,7 @@ import {
 import {
   Observable
 } from 'rxjs';
+import { environment } from '../environments/environment';
 
 
 @Injectable({
@@ -17,7 +18,7 @@ import {
 export class PaymentService {
 
   private apiUrl =
-    'http://localhost:3000/api/payment';
+    `${environment.apiUrl}/payment`;
 
 
   constructor(

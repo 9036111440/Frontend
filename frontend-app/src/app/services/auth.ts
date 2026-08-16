@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
 
 export interface RegisterRequest {
   firstName: string;
@@ -56,7 +57,7 @@ export interface LoginResponse {
   providedIn: 'root'
 })
 export class Auth {
-  private readonly apiUrl = 'http://localhost:3000/api/auth';
+  private readonly apiUrl = `${environment.apiUrl}/auth`;
 
   constructor(private http: HttpClient) {}
 
