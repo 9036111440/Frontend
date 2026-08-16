@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
 
 export interface RegisterRequest {
   firstName: string;
@@ -8,6 +9,7 @@ export interface RegisterRequest {
   email: string;
   password: string;
   confirmPassword: string;
+  verificationToken: string;
 }
 
 export interface RegisterResponse {
@@ -20,13 +22,71 @@ export interface RegisterResponse {
   };
 }
 
+export interface LoginRequest {
+
+    email: string;
+
+    password: string;
+
+}
+
+
+export interface LoginResponse {
+
+    message: string;
+
+    accessToken: string;
+
+    refreshToken: string;
+
+    user: {
+
+        id: string;
+
+        firstName: string;
+
+        lastName: string;
+
+        email: string;
+
+    };
+
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class Auth {
-  private readonly apiUrl = 'http://localhost:3000/api/auth';
+  private readonly apiUrl = `${environment.apiUrl}/auth`;
 
   constructor(private http: HttpClient) {}
+
+  sendOtp(email: string): Observable<any> {
+
+    return this.http.post(
+      `${this.apiUrl}/send-otp`,
+      {
+        email
+      }
+    );
+
+  }
+
+
+  verifyOtp(
+    email: string,
+    otp: string
+  ): Observable<any> {
+
+    return this.http.post(
+      `${this.apiUrl}/verify-otp`,
+      {
+        email,
+        otp
+      }
+    );
+
+  }
 
   register(
     data: RegisterRequest
@@ -37,4 +97,18 @@ export class Auth {
       data
     );
   }
+  
+  login(
+    data: LoginRequest
+): Observable<LoginResponse> {
+
+    return this.http.post<LoginResponse>(
+        `${this.apiUrl}/login`,
+        data,
+        {
+            withCredentials: true
+        }
+    );
+
+}
 }

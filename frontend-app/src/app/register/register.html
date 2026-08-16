@@ -104,46 +104,142 @@
 
       <!-- Email -->
 
-      <nz-form-item>
+<!-- Email -->
+
+<nz-form-item>
+
+    <nz-form-label nzRequired>
+        Email
+    </nz-form-label>
+
+    <nz-form-control>
+
+        <div class="email-row">
+
+            <input
+                nz-input
+                type="email"
+                formControlName="email"
+                placeholder="Enter email"
+            />
+
+            <button
+                nz-button
+                nzType="default"
+                type="button"
+                [nzLoading]="isSendingOtp"
+                [disabled]="
+                    registerForm.get('email')?.invalid ||
+                    emailVerified
+                "
+                (click)="sendOtp()"
+            >
+                {{ emailOtpSent ? 'Resend OTP' : 'Send OTP' }}
+            </button>
+
+        </div>
+
+
+        @if (
+            registerForm.get('email')?.touched &&
+            registerForm.get('email')?.hasError('required')
+        ) {
+
+            <span class="error">
+                Email is required
+            </span>
+
+        }
+
+
+        @if (
+            registerForm.get('email')?.touched &&
+            registerForm.get('email')?.hasError('email')
+        ) {
+
+            <span class="error">
+                Please enter a valid email
+            </span>
+
+        }
+
+
+        @if (emailVerified) {
+
+            <span class="success">
+                ✓ Email verified successfully
+            </span>
+
+        }
+
+    </nz-form-control>
+
+</nz-form-item>
+
+@if (emailOtpSent && !emailVerified) {
+
+    <nz-form-item>
 
         <nz-form-label nzRequired>
-          Email
+            OTP
         </nz-form-label>
 
         <nz-form-control>
 
-          <input
-            nz-input
-            type="email"
-            formControlName="email"
-            placeholder="Enter email"
-          />
+            <div class="otp-row">
 
-          @if (
-            registerForm.get('email')?.touched &&
-            registerForm.get('email')?.hasError('required')
-          ) {
+                <input
+                    nz-input
+                    formControlName="otp"
+                    maxlength="6"
+                    inputmode="numeric"
+                    placeholder="Enter 6-digit OTP"
+                />
 
-            <span class="error">
-              Email is required
-            </span>
+                <button
+                    nz-button
+                    nzType="primary"
+                    type="button"
+                    [nzLoading]="isVerifyingOtp"
+                    [disabled]="
+                        registerForm.get('otp')?.invalid
+                    "
+                    (click)="verifyOtp()"
+                >
+                    Verify
+                </button>
 
-          }
+            </div>
 
-          @if (
-            registerForm.get('email')?.touched &&
-            registerForm.get('email')?.hasError('email')
-          ) {
 
-            <span class="error">
-              Please enter a valid email
-            </span>
+            @if (
+                registerForm.get('otp')?.touched &&
+                registerForm.get('otp')?.hasError('required')
+            ) {
 
-          }
+                <span class="error">
+                    OTP is required
+                </span>
+
+            }
+
+
+            @if (
+                registerForm.get('otp')?.touched &&
+                registerForm.get('otp')?.hasError('pattern')
+            ) {
+
+                <span class="error">
+                    OTP must be exactly 6 digits
+                </span>
+
+            }
 
         </nz-form-control>
 
-      </nz-form-item>
+    </nz-form-item>
+
+}
 
 
       <!-- Password -->
@@ -258,16 +354,23 @@
             nzBlock
             type="submit"
             [nzLoading]="isLoading"
-            [disabled]="isLoading"
+            [disabled]="isLoading ||
+        !emailVerified"
           >
             Create Account
           </button>
+
+
 
         </nz-form-control>
 
       </nz-form-item>
 
     </form>
+    <div class="login-link">
+  Already have an account?
+  <a routerLink="/login">Login</a>
+</div>
 
   </div>
 
