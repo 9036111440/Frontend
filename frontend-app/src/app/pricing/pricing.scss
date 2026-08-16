@@ -1,0 +1,94 @@
+.pricing-container {
+
+  min-height: 100vh;
+
+  padding: 60px 20px;
+
+  text-align: center;
+
+  background: #f7f7f8;
+
+}
+
+
+.pricing-container h1 {
+
+  font-size: 36px;
+
+  margin-bottom: 10px;
+
+}
+
+
+.subtitle {
+
+  color: #777;
+
+  margin-bottom: 40px;
+
+}
+
+
+.plans {
+
+  display: flex;
+
+  justify-content: center;
+
+  gap: 25px;
+
+  flex-wrap: wrap;
+
+}
+
+
+.plan-card {
+
+  width: 320px;
+
+  text-align: left;
+
+}
+
+
+.pro-card {
+
+  border: 2px solid #1677ff;
+
+}
+
+
+.price {
+
+  font-size: 32px;
+
+  font-weight: bold;
+
+  margin: 20px 0;
+
+}
+
+
+.period {
+
+  color: #777;
+
+  margin-bottom: 20px;
+
+}
+
+
+.plan-card ul {
+
+  padding-left: 20px;
+
+  min-height: 160px;
+
+}
+
+
+.plan-card li {
+
+  margin-bottom: 12px;
+
+}

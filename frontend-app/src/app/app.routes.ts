@@ -15,6 +15,16 @@ export const routes: Routes = [
       import('./register/register')
         .then(m => m.Register)
   },
+{
+  path: 'pricing',
+
+  loadComponent: () =>
+    import('./pricing/pricing')
+      .then(
+        m => m.Pricing
+      )
+},
+
   {
   path: 'dashboard',
 

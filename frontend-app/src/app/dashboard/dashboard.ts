@@ -27,6 +27,7 @@ import {
 import {
   NzIconModule
 } from 'ng-zorro-antd/icon';
+import { RouterLink } from '@angular/router';
 
 import { finalize } from 'rxjs';
 
@@ -51,7 +52,8 @@ interface Conversation {
     FormsModule,
     NzButtonModule,
     NzInputModule,
-    NzIconModule
+    NzIconModule,
+    RouterLink
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
@@ -100,57 +102,149 @@ export class Dashboard implements OnInit {
     this.selectedFile = null;
   }
 
-  sendMessage(): void {
-    // Get the message and file first
-    const message = this.message.trim();
-    const file = this.selectedFile;
+sendMessage(): void {
 
-    // Clear input immediately
-    this.message = '';
-    this.selectedFile = null;
+  // Get the message and file first
+  const message = this.message.trim();
+  const file = this.selectedFile;
 
-    // If nothing to send, return
-    if (!message && !file) {
-      return;
-    }
+  // Clear input immediately
+  this.message = '';
+  this.selectedFile = null;
 
-    // Add user message
-    this.messages.push({
-      role: 'user',
-      content: message || file?.name || 'Attachment'
+  // If nothing to send, return
+  if (!message && !file) {
+    return;
+  }
+
+  // Add user message
+  this.messages.push({
+    role: 'user',
+    content: message || file?.name || 'Attachment'
+  });
+
+  // Start loading
+  this.isLoading = true;
+  this.cdr.markForCheck();
+
+
+  this.chatService
+    .sendMessage(
+      message,
+      this.conversationId,
+      file || undefined
+    )
+    .pipe(
+      finalize(() => {
+
+        this.isLoading = false;
+
+        this.cdr.markForCheck();
+
+      })
+    )
+    .subscribe({
+
+      // =================================
+      // SUCCESS
+      // =================================
+
+      next: (response) => {
+
+        console.log(
+          'Chat response:',
+          response
+        );
+
+
+        this.conversationId =
+          response.conversationId;
+
+
+        this.messages.push({
+
+          role: 'assistant',
+
+          content:
+            response.assistantMessage.content
+
+        });
+
+
+        this.isLoading = false;
+
+        this.cdr.markForCheck();
+
+
+        // Refresh recent conversations
+        this.loadConversations();
+
+      },
+
+
+      // =================================
+      // ERROR
+      // =================================
+
+      error: (error) => {
+
+        console.error(
+          'Chat API error:',
+          error
+        );
+
+
+        this.isLoading = false;
+
+
+        // -------------------------------
+        // Demo chat limit reached
+        // -------------------------------
+
+        if (
+          error.status === 403 &&
+          error.error?.code ===
+            'CHAT_LIMIT_REACHED'
+        ) {
+
+          this.messages.push({
+
+            role: 'assistant',
+
+            content:
+              'You have reached the 3-message Demo limit for this conversation. Please upgrade to Pro for unlimited chats.'
+
+          });
+
+
+          this.cdr.markForCheck();
+
+          return;
+
+        }
+
+
+        // -------------------------------
+        // Other errors
+        // -------------------------------
+
+        this.messages.push({
+
+          role: 'assistant',
+
+          content:
+            'Sorry, something went wrong while processing your request.'
+
+        });
+
+
+        this.cdr.markForCheck();
+
+      }
+
     });
 
-    // Start loading
-    this.isLoading = true;
-    this.cdr.markForCheck();
-
-    this.chatService.sendMessage(message, this.conversationId, file || undefined)
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        })
-      )
-      .subscribe({
-        next: (response) => {
-          this.conversationId = response.conversationId;
-          this.messages.push({
-            role: 'assistant',
-            content: response.assistantMessage.content
-          });
-          this.isLoading = false;
-          this.cdr.markForCheck();
-          this.loadConversations();
-        },
-        error: (error) => {
-          this.messages.push({
-            role: 'assistant',
-            content: 'Sorry, something went wrong while processing your request.'
-          });
-          this.cdr.markForCheck();
-        }
-      });
-  }
+}
 
   openConversation(conversation: Conversation): void {
     this.isLoading = false;

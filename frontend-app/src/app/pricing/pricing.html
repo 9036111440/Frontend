@@ -1,0 +1,108 @@
+<div class="pricing-container">
+
+  <h1>
+    Choose your plan
+  </h1>
+
+  <p class="subtitle">
+    Start chatting for free or upgrade to Pro.
+  </p>
+
+
+  <div class="plans">
+
+
+    <!-- DEMO -->
+
+    <nz-card
+      nzTitle="Demo"
+      class="plan-card"
+    >
+
+      <div class="price">
+
+        Free
+
+      </div>
+
+      <ul>
+
+        <li>3 messages per conversation</li>
+
+        <li>AI Chat</li>
+
+        <li>Conversation history</li>
+
+        <li>PDF questions</li>
+
+      </ul>
+
+      <button
+        nz-button
+        nzBlock
+      >
+        Current Plan
+      </button>
+
+    </nz-card>
+
+
+    <!-- PRO -->
+
+    <nz-card
+      nzTitle="Pro"
+      class="plan-card pro-card"
+    >
+
+      <nz-tag nzColor="blue">
+        RECOMMENDED
+      </nz-tag>
+
+
+      <div class="price">
+
+        ₹99
+
+      </div>
+
+
+      <div class="period">
+
+        One-time demo payment
+
+      </div>
+
+
+      <ul>
+
+        <li>Unlimited messages</li>
+
+        <li>AI Chat</li>
+
+        <li>Conversation history</li>
+
+        <li>PDF questions</li>
+
+        <li>Image questions</li>
+
+      </ul>
+
+
+      <button
+        nz-button
+        nzType="primary"
+        nzBlock
+        [nzLoading]="isLoading"
+        (click)="upgradeToPro()"
+      >
+
+        Upgrade to Pro
+
+      </button>
+
+    </nz-card>
+
+
+  </div>
+
+</div>
