@@ -1,0 +1,639 @@
+<div class="admin-page">
+
+  <!-- HEADER -->
+
+  <div class="admin-header">
+
+    <div>
+
+      <h1>
+        Admin Dashboard
+      </h1>
+
+      <p>
+        Monitor users, conversations, subscriptions and AI usage.
+      </p>
+
+    </div>
+
+
+    <div class="header-actions">
+
+      <button
+        nz-button
+        nzType="default"
+        (click)="refresh()"
+        [disabled]="isLoading"
+      >
+
+        <span nz-icon nzType="reload"></span>
+
+        Refresh
+
+      </button>
+
+
+      <a
+        nz-button
+        nzType="default"
+        routerLink="/dashboard"
+      >
+
+        Back to Chat
+
+      </a>
+
+    </div>
+
+  </div>
+
+
+  <!-- LOADING -->
+
+  @if (isLoading) {
+
+    <div class="loading-container">
+
+      <nz-spin
+        nzSize="large"
+        nzTip="Loading dashboard..."
+      ></nz-spin>
+
+    </div>
+
+  }
+
+
+  <!-- ERROR -->
+
+  @if (!isLoading && hasError) {
+
+    <nz-card>
+
+      <div class="error-container">
+
+        <h3>
+          Unable to load dashboard
+        </h3>
+
+        <p>
+          Please check your admin access and backend API.
+        </p>
+
+        <button
+          nz-button
+          nzType="primary"
+          (click)="refresh()"
+        >
+          Try Again
+        </button>
+
+      </div>
+
+    </nz-card>
+
+  }
+
+
+  @if (!isLoading && !hasError) {
+
+    <!-- ===================================== -->
+    <!-- SUMMARY CARDS -->
+    <!-- ===================================== -->
+
+    <div class="stats-grid">
+
+
+      <!-- TOTAL USERS -->
+
+      <nz-card class="stat-card">
+
+        <div class="stat-header">
+
+          <div class="stat-icon users">
+            <span
+              nz-icon
+              nzType="team"
+            ></span>
+          </div>
+
+          <span class="stat-label">
+            Total Users
+          </span>
+
+        </div>
+
+
+        <div class="stat-value">
+          {{ totalUsers }}
+        </div>
+
+
+      </nz-card>
+
+
+      <!-- DEMO USERS -->
+
+      <nz-card class="stat-card">
+
+        <div class="stat-header">
+
+          <div class="stat-icon demo">
+            <span
+              nz-icon
+              nzType="user"
+            ></span>
+          </div>
+
+          <span class="stat-label">
+            Demo Users
+          </span>
+
+        </div>
+
+
+        <div class="stat-value">
+          {{ demoUsers }}
+        </div>
+
+
+      </nz-card>
+
+
+      <!-- PRO USERS -->
+
+      <nz-card class="stat-card">
+
+        <div class="stat-header">
+
+          <div class="stat-icon pro">
+            <span
+              nz-icon
+              nzType="crown"
+            ></span>
+          </div>
+
+          <span class="stat-label">
+            Pro Users
+          </span>
+
+        </div>
+
+
+        <div class="stat-value">
+          {{ proUsers }}
+        </div>
+
+
+      </nz-card>
+
+
+      <!-- ACTIVE USERS -->
+
+      <nz-card class="stat-card">
+
+        <div class="stat-header">
+
+          <div class="stat-icon active">
+            <span
+              nz-icon
+              nzType="thunderbolt"
+            ></span>
+          </div>
+
+          <span class="stat-label">
+            Active Users
+          </span>
+
+        </div>
+
+
+        <div class="stat-value">
+          {{ activeUsers }}
+        </div>
+
+
+      </nz-card>
+
+
+      <!-- CONVERSATIONS -->
+
+      <nz-card class="stat-card">
+
+        <div class="stat-header">
+
+          <div class="stat-icon chat">
+            <span
+              nz-icon
+              nzType="message"
+            ></span>
+          </div>
+
+          <span class="stat-label">
+            Conversations
+          </span>
+
+        </div>
+
+
+        <div class="stat-value">
+          {{ totalConversations }}
+        </div>
+
+
+      </nz-card>
+
+
+      <!-- MESSAGES -->
+
+      <nz-card class="stat-card">
+
+        <div class="stat-header">
+
+          <div class="stat-icon messages">
+            <span
+              nz-icon
+              nzType="comment"
+            ></span>
+          </div>
+
+          <span class="stat-label">
+            Total Messages
+          </span>
+
+        </div>
+
+
+        <div class="stat-value">
+          {{ totalMessages }}
+        </div>
+
+
+      </nz-card>
+
+
+      <!-- REVENUE -->
+
+      <nz-card class="stat-card">
+
+        <div class="stat-header">
+
+          <div class="stat-icon revenue">
+            <span
+              nz-icon
+              nzType="dollar"
+            ></span>
+          </div>
+
+          <span class="stat-label">
+            Revenue
+          </span>
+
+        </div>
+
+
+        <div class="stat-value">
+          ₹{{ revenue | number:'1.0-2' }}
+        </div>
+
+
+      </nz-card>
+
+
+      <!-- CONVERSION -->
+
+      <nz-card class="stat-card">
+
+        <div class="stat-header">
+
+          <div class="stat-icon conversion">
+            <span
+              nz-icon
+              nzType="rise"
+            ></span>
+          </div>
+
+          <span class="stat-label">
+            Pro Conversion
+          </span>
+
+        </div>
+
+
+        <div class="stat-value">
+
+          {{ conversionRate | number:'1.1-1' }}%
+
+        </div>
+
+
+      </nz-card>
+
+    </div>
+
+
+    <!-- ===================================== -->
+    <!-- FIRST CHART ROW -->
+    <!-- ===================================== -->
+
+    <div class="chart-grid">
+
+
+      <nz-card
+        class="chart-card"
+        nzTitle="New Users Per Day"
+      >
+
+        <apx-chart
+
+          [series]="usersChart.series!"
+
+          [chart]="usersChart.chart!"
+
+          [xaxis]="usersChart.xaxis!"
+
+          [stroke]="usersChart.stroke!"
+
+          [dataLabels]="usersChart.dataLabels!"
+
+          [grid]="usersChart.grid!"
+
+          [tooltip]="usersChart.tooltip!"
+
+        ></apx-chart>
+
+      </nz-card>
+
+
+
+      <nz-card
+        class="chart-card"
+        nzTitle="Messages Per Day"
+      >
+
+        <apx-chart
+
+          [series]="messagesChart.series!"
+
+          [chart]="messagesChart.chart!"
+
+          [xaxis]="messagesChart.xaxis!"
+
+          [stroke]="messagesChart.stroke!"
+
+          [dataLabels]="messagesChart.dataLabels!"
+
+          [grid]="messagesChart.grid!"
+
+          [tooltip]="messagesChart.tooltip!"
+
+        ></apx-chart>
+
+      </nz-card>
+
+    </div>
+
+
+    <!-- ===================================== -->
+    <!-- SECOND CHART ROW -->
+    <!-- ===================================== -->
+
+    <div class="chart-grid">
+
+
+      <nz-card
+        class="chart-card"
+        nzTitle="Demo vs Pro Users"
+      >
+
+        <apx-chart
+
+          [series]="planChart.series!"
+
+          [chart]="planChart.chart!"
+
+          [labels]="planChart.labels!"
+
+          [legend]="planChart.legend!"
+
+          [plotOptions]="planChart.plotOptions!"
+
+        ></apx-chart>
+
+      </nz-card>
+
+
+
+      <nz-card
+        class="chart-card"
+        nzTitle="Pro Conversions"
+      >
+
+        <apx-chart
+
+          [series]="conversionChart.series!"
+
+          [chart]="conversionChart.chart!"
+
+          [xaxis]="conversionChart.xaxis!"
+
+          [plotOptions]="conversionChart.plotOptions!"
+
+          [dataLabels]="conversionChart.dataLabels!"
+
+          [grid]="conversionChart.grid!"
+
+        ></apx-chart>
+
+      </nz-card>
+
+    </div>
+
+
+    <!-- ===================================== -->
+    <!-- REVENUE -->
+    <!-- ===================================== -->
+
+    <nz-card
+      class="revenue-card"
+      nzTitle="Revenue"
+    >
+
+      <apx-chart
+
+        [series]="revenueChart.series!"
+
+        [chart]="revenueChart.chart!"
+
+        [xaxis]="revenueChart.xaxis!"
+
+        [stroke]="revenueChart.stroke!"
+
+        [dataLabels]="revenueChart.dataLabels!"
+
+        [grid]="revenueChart.grid!"
+
+      ></apx-chart>
+
+    </nz-card>
+
+
+    <!-- ===================================== -->
+    <!-- RECENT USERS -->
+    <!-- ===================================== -->
+
+    <nz-card
+      class="users-card"
+      nzTitle="Recent Registrations"
+    >
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                User
+              </th>
+
+              <th>
+                Email
+              </th>
+
+              <th>
+                Plan
+              </th>
+
+              <th>
+                Role
+              </th>
+
+              <th>
+                Registered
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              user of recentUsers;
+              track user.email
+            ) {
+
+              <tr>
+
+                <td>
+
+                  <strong>
+
+                    {{ user.firstName }}
+                    {{ user.lastName }}
+
+                  </strong>
+
+                </td>
+
+
+                <td>
+
+                  {{ user.email }}
+
+                </td>
+
+
+                <td>
+
+                  @if (
+                    user.plan === 'pro'
+                  ) {
+
+                    <nz-tag
+                      nzColor="gold"
+                    >
+                      PRO
+                    </nz-tag>
+
+                  } @else {
+
+                    <nz-tag>
+                      DEMO
+                    </nz-tag>
+
+                  }
+
+                </td>
+
+
+                <td>
+
+                  @if (
+                    user.role === 'admin'
+                  ) {
+
+                    <nz-tag
+                      nzColor="red"
+                    >
+                      ADMIN
+                    </nz-tag>
+
+                  } @else {
+
+                    <nz-tag
+                      nzColor="blue"
+                    >
+                      USER
+                    </nz-tag>
+
+                  }
+
+                </td>
+
+
+                <td>
+
+                  {{ user.createdAt | date:'dd MMM yyyy, HH:mm' }}
+
+                </td>
+
+              </tr>
+
+            }
+
+
+            @if (
+              recentUsers.length === 0
+            ) {
+
+              <tr>
+
+                <td
+                  colspan="5"
+                  class="empty"
+                >
+
+                  No registrations found.
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </nz-card>
+
+  }
+
+</div>
