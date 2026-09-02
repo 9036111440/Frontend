@@ -224,6 +224,12 @@ export class Admin
   totalMessages:
     number = 0;
 
+    totalLikes:
+  number = 0;
+
+totalDislikes:
+  number = 0;
+
   revenue:
     number = 0;
 
@@ -879,6 +885,16 @@ export class Admin
       Number(
         data?.totalMessages || 0
       );
+
+      this.totalLikes =
+  Number(
+    data?.totalLikes || 0
+  );
+
+this.totalDislikes =
+  Number(
+    data?.totalDislikes || 0
+  );
 
 
     this.revenue =

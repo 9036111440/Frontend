@@ -2344,6 +2344,181 @@
 
 
 /* =========================================================
+   AI MESSAGE ACTIONS
+   ========================================================= */
+
+.ai-message-actions {
+  display: flex;
+
+  align-items: center;
+
+  gap: 4px;
+
+  margin-top: 12px;
+
+  padding-top: 9px;
+
+  border-top: 1px solid
+    rgba(120, 125, 145, 0.12);
+
+  opacity: 0;
+
+  transform: translateY(-2px);
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+/*
+ * Show actions when hovering over the
+ * AI message area.
+ */
+
+.message-content:hover
+  .ai-message-actions,
+
+.ai-message-actions:hover {
+  opacity: 1;
+
+  transform: translateY(0);
+}
+
+
+/* =========================================================
+   ACTION BUTTON
+   ========================================================= */
+
+.message-action {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 6px;
+
+  min-width: 32px;
+
+  height: 32px;
+
+  padding:
+    0
+    9px;
+
+  border: 1px solid transparent;
+
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: #8b90a0;
+
+  cursor: pointer;
+
+  font-size: 12px;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+
+.message-action:hover:not(:disabled) {
+  background: #f1f3f8;
+
+  color: #5f66dc;
+
+  border-color: #e5e7ef;
+}
+
+
+.message-action:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.5;
+}
+
+
+/* =========================================================
+   ACTION LABEL
+   ========================================================= */
+
+.action-label {
+  font-size: 11px;
+
+  font-weight: 550;
+}
+
+
+/* =========================================================
+   FEEDBACK BUTTON
+   ========================================================= */
+
+.feedback-button {
+  width: 32px;
+
+  padding: 0;
+}
+
+
+.feedback-button.active {
+  color: #6557df;
+
+  background:
+    rgba(101, 87, 223, 0.09);
+
+  border-color:
+    rgba(101, 87, 223, 0.12);
+}
+
+
+/* =========================================================
+   LOADING ICON
+   ========================================================= */
+
+.message-action
+  [nz-icon] {
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .ai-message-actions {
+    opacity: 1;
+
+    transform: none;
+
+    margin-top: 10px;
+
+    padding-top: 7px;
+  }
+
+
+  .action-label {
+    display: none;
+  }
+
+
+  .message-action {
+    width: 34px;
+
+    height: 34px;
+
+    padding: 0;
+  }
+
+}
+
+
+/* =========================================================
    COMPOSER HINT
    ========================================================= */
 

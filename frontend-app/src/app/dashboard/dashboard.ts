@@ -43,6 +43,10 @@ import {
 
 interface ChatMessage {
 
+  _id?: string;
+
+  id?: string;
+
   role:
     | 'user'
     | 'assistant';
@@ -50,6 +54,8 @@ interface ChatMessage {
   content: string;
 
   attachment?: any;
+
+  feedback?: 'up' | 'down' | null;
 
 }
 
@@ -133,6 +139,12 @@ export class Dashboard
 
   isLoading =
     false;
+
+    regeneratingMessageIndex:
+  number | null = null;
+
+feedbackLoading:
+  number | null = null;
 
 
   conversationId:
@@ -353,6 +365,282 @@ export class Dashboard
   }
 
 
+
+  copyMessage(
+  content: string
+): void {
+
+  navigator.clipboard
+    .writeText(content)
+    .then(() => {
+
+      console.log(
+        'Message copied successfully'
+      );
+
+    })
+    .catch((error) => {
+
+      console.error(
+        'Copy failed:',
+        error
+      );
+
+    });
+
+}
+
+
+regenerateMessage(
+  messageIndex: number
+): void {
+
+  if (
+    this.isLoading ||
+    this.regeneratingMessageIndex !== null
+  ) {
+
+    return;
+
+  }
+
+
+  if (!this.conversationId) {
+
+    console.warn(
+      'No conversation selected'
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * Only the last AI response can be regenerated.
+   */
+
+  const lastMessageIndex =
+    this.messages.length - 1;
+
+
+  if (
+    messageIndex !==
+    lastMessageIndex
+  ) {
+
+    console.warn(
+      'Only the latest AI response can be regenerated'
+    );
+
+    return;
+
+  }
+
+
+  const message =
+    this.messages[messageIndex];
+
+
+  if (
+    message.role !==
+    'assistant'
+  ) {
+
+    return;
+
+  }
+
+
+  this.regeneratingMessageIndex =
+    messageIndex;
+
+  this.cdr.markForCheck();
+
+
+  this.chatService
+    .regenerateResponse(
+      this.conversationId
+    )
+    .pipe(
+
+      finalize(() => {
+
+        this.regeneratingMessageIndex =
+          null;
+
+        this.cdr.markForCheck();
+
+      })
+
+    )
+    .subscribe({
+
+      next: (response) => {
+
+        console.log(
+          'Regenerated response:',
+          response
+        );
+
+
+        /*
+         * Replace existing AI response
+         * instead of adding another message.
+         */
+
+        this.messages[
+          messageIndex
+        ] = {
+
+          _id:
+            response.messageId,
+
+          role:
+            'assistant',
+
+          content:
+            response.content,
+
+          feedback:
+            null
+
+        };
+
+
+        this.cdr.markForCheck();
+
+      },
+
+
+      error: (error) => {
+
+        console.error(
+          'Regenerate failed:',
+          error
+        );
+
+
+        /*
+         * Don't destroy the previous response.
+         *
+         * The original answer remains visible.
+         */
+
+        this.cdr.markForCheck();
+
+      }
+
+    });
+
+}
+
+
+giveFeedback(
+  messageIndex: number,
+  feedback: 'up' | 'down'
+): void {
+
+  const message =
+    this.messages[messageIndex];
+
+
+  if (
+    !message ||
+    message.role !== 'assistant'
+  ) {
+
+    return;
+
+  }
+
+
+  if (!this.conversationId) {
+
+    return;
+
+  }
+
+
+  const messageId =
+    message._id ||
+    message.id;
+
+
+  if (!messageId) {
+
+    console.warn(
+      'Message ID missing'
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * If the same feedback is clicked again,
+   * remove it visually.
+   *
+   * The backend remains the source of truth.
+   */
+
+  this.feedbackLoading =
+    messageIndex;
+
+
+  this.chatService
+    .sendFeedback(
+      this.conversationId,
+      messageId,
+      feedback
+    )
+    .pipe(
+
+      finalize(() => {
+
+        this.feedbackLoading =
+          null;
+
+        this.cdr.markForCheck();
+
+      })
+
+    )
+    .subscribe({
+
+      next: (response) => {
+
+        console.log(
+          'Feedback saved:',
+          response
+        );
+
+
+        this.messages[
+          messageIndex
+        ].feedback =
+          feedback;
+
+
+        this.cdr.markForCheck();
+
+      },
+
+
+      error: (error) => {
+
+        console.error(
+          'Feedback failed:',
+          error
+        );
+
+      }
+
+    });
+
+}
+
   /*
    * ==========================================
    * UPGRADE
@@ -558,17 +846,28 @@ openAdminPanel(): void {
             response.conversationId;
 
 
-          this.messages.push({
+this.messages.push({
 
-            role:
-              'assistant',
+  _id:
+    response
+      ?.assistantMessage
+      ?._id ||
+    response
+      ?.assistantMessage
+      ?.id,
 
-            content:
-              response
-                .assistantMessage
-                .content
+  role:
+    'assistant',
 
-          });
+  content:
+    response
+      .assistantMessage
+      .content,
+
+  feedback:
+    null
+
+});
 
 
           this.isLoading =
@@ -681,17 +980,31 @@ openAdminPanel(): void {
 
       .subscribe({
 
-        next: (data: any) => {
+next: (data: any) => {
 
-          this.messages =
-            data.messages;
+  this.messages =
+    (data.messages || []).map(
+      (message: any) => ({
 
-          this.isLoading =
-            false;
+        ...message,
 
-          this.cdr.markForCheck();
+        _id:
+          message._id ||
+          message.id,
 
-        },
+        feedback:
+          message.feedback || null
+
+      })
+    );
+
+
+  this.isLoading =
+    false;
+
+  this.cdr.markForCheck();
+
+},
 
         error: (error: any) => {
 
