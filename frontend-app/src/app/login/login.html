@@ -1,136 +1,356 @@
-<div class="login-container">
+<div class="login-page">
 
-    <div class="login-card">
+  <!-- ========================================= -->
+  <!-- LEFT BRAND PANEL -->
+  <!-- ========================================= -->
 
-        <h1>Welcome Back</h1>
+  <div class="brand-panel">
 
-        <p class="subtitle">
-            Login to your AI Chatbot
+    <div class="brand-content">
+
+      <div class="brand-logo">
+        <div class="logo-icon">
+          <span class="logo-dot"></span>
+          <span class="logo-dot"></span>
+          <span class="logo-dot"></span>
+        </div>
+
+        <span class="brand-name">
+          AI Chatbot
+        </span>
+      </div>
+
+
+      <div class="brand-main">
+
+        <span class="eyebrow">
+          YOUR AI ASSISTANT
+        </span>
+
+        <h1>
+          Smarter conversations.<br />
+          <span>Better answers.</span>
+        </h1>
+
+        <p>
+          Connect with your AI assistant, ask questions,
+          explore ideas and get intelligent answers in seconds.
         </p>
 
 
+        <!-- Features -->
+
+        <div class="feature-list">
+
+          <div class="feature-item">
+            <div class="feature-icon">
+              <span nz-icon nzType="thunderbolt" nzTheme="outline"></span>
+            </div>
+
+            <div>
+              <strong>Fast & Intelligent</strong>
+
+              <small>
+                Get AI-powered responses instantly
+              </small>
+            </div>
+          </div>
+
+
+          <div class="feature-item">
+            <div class="feature-icon">
+              <span nz-icon nzType="file-text" nzTheme="outline"></span>
+            </div>
+
+            <div>
+              <strong>Work With Documents</strong>
+
+              <small>
+                Upload PDFs and ask questions
+              </small>
+            </div>
+          </div>
+
+
+          <div class="feature-item">
+            <div class="feature-icon">
+              <span nz-icon nzType="lock" nzTheme="outline"></span>
+            </div>
+
+            <div>
+              <strong>Secure & Private</strong>
+
+              <small>
+                Your conversations stay protected
+              </small>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="brand-footer">
+        <span>Powered by AI</span>
+        <span class="footer-dot">•</span>
+        <span>Built for smarter work</span>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- RIGHT LOGIN PANEL -->
+  <!-- ========================================= -->
+
+  <div class="login-panel">
+
+    <div class="login-wrapper">
+
+
+      <!-- Mobile logo -->
+
+      <div class="mobile-brand">
+
+        <div class="mobile-logo-icon">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+        <span>AI Chatbot</span>
+
+      </div>
+
+
+      <!-- Login Card -->
+
+      <div class="login-card">
+
+
+        <!-- Header -->
+
+        <div class="login-header">
+
+          <div class="welcome-icon">
+
+            <span
+              nz-icon
+              nzType="message"
+              nzTheme="outline">
+            </span>
+
+          </div>
+
+
+          <h2>
+            Welcome back
+          </h2>
+
+          <p>
+            Sign in to continue to your AI workspace.
+          </p>
+
+        </div>
+
+
+        <!-- Form -->
+
         <form
-            nz-form
-            nzLayout="vertical"
-            [formGroup]="loginForm"
-            (ngSubmit)="submit()"
+          nz-form
+          nzLayout="vertical"
+          [formGroup]="loginForm"
+          (ngSubmit)="submit()"
         >
 
-            <!-- Email -->
 
-            <nz-form-item>
+          <!-- Email -->
 
-                <nz-form-label nzRequired>
-                    Email
-                </nz-form-label>
+          <nz-form-item>
 
-                <nz-form-control>
+            <nz-form-label nzRequired>
+              Email address
+            </nz-form-label>
 
-                    <input
-                        nz-input
-                        type="email"
-                        formControlName="email"
-                        placeholder="Enter your email"
-                    />
+            <nz-form-control>
 
+              <div class="input-wrapper">
 
-                    @if (
-                        loginForm.get('email')?.touched &&
-                        loginForm.get('email')?.hasError('required')
-                    ) {
+                <span
+                  class="input-icon"
+                  nz-icon
+                  nzType="mail"
+                  nzTheme="outline">
+                </span>
 
-                        <span class="error">
-                            Email is required
-                        </span>
+                <input
+                  nz-input
+                  type="email"
+                  formControlName="email"
+                  placeholder="you@example.com"
+                />
 
-                    }
-
-
-                    @if (
-                        loginForm.get('email')?.touched &&
-                        loginForm.get('email')?.hasError('email')
-                    ) {
-
-                        <span class="error">
-                            Please enter a valid email address
-                        </span>
-
-                    }
-
-                </nz-form-control>
-
-            </nz-form-item>
+              </div>
 
 
-            <!-- Password -->
+              @if (
+                loginForm.get('email')?.touched &&
+                loginForm.get('email')?.hasError('required')
+              ) {
 
-            <nz-form-item>
+                <span class="error">
+                  Email is required
+                </span>
 
-                <nz-form-label nzRequired>
-                    Password
-                </nz-form-label>
-
-                <nz-form-control>
-
-                    <input
-                        nz-input
-                        type="password"
-                        formControlName="password"
-                        placeholder="Enter your password"
-                    />
+              }
 
 
-                    @if (
-                        loginForm.get('password')?.touched &&
-                        loginForm.get('password')?.hasError('required')
-                    ) {
+              @if (
+                loginForm.get('email')?.touched &&
+                loginForm.get('email')?.hasError('email')
+              ) {
 
-                        <span class="error">
-                            Password is required
-                        </span>
+                <span class="error">
+                  Please enter a valid email address
+                </span>
 
-                    }
+              }
 
-                </nz-form-control>
+            </nz-form-control>
 
-            </nz-form-item>
+          </nz-form-item>
 
 
-            <!-- Submit -->
+          <!-- Password -->
 
-            <nz-form-item>
+          <nz-form-item>
 
-                <nz-form-control>
+            <nz-form-label nzRequired>
+              Password
+            </nz-form-label>
 
-                    <button
-                        nz-button
-                        nzType="primary"
-                        nzSize="large"
-                        nzBlock
-                        type="submit"
-                        [nzLoading]="isLoading"
-                        [disabled]="isLoading"
-                    >
-                        Login
-                    </button>
+            <nz-form-control>
 
-                </nz-form-control>
+              <div class="input-wrapper">
 
-            </nz-form-item>
+                <span
+                  class="input-icon"
+                  nz-icon
+                  nzType="lock"
+                  nzTheme="outline">
+                </span>
+
+                <input
+                  nz-input
+                  type="password"
+                  formControlName="password"
+                  placeholder="Enter your password"
+                />
+
+              </div>
+
+
+              @if (
+                loginForm.get('password')?.touched &&
+                loginForm.get('password')?.hasError('required')
+              ) {
+
+                <span class="error">
+                  Password is required
+                </span>
+
+              }
+
+            </nz-form-control>
+
+          </nz-form-item>
+
+
+          <!-- Login Button -->
+
+          <nz-form-item class="login-button-item">
+
+            <nz-form-control>
+
+              <button
+                nz-button
+                nzType="primary"
+                nzSize="large"
+                nzBlock
+                type="submit"
+                [nzLoading]="isLoading"
+                [disabled]="isLoading"
+                class="login-button"
+              >
+
+                @if (!isLoading) {
+
+                  <span
+                    nz-icon
+                    nzType="login"
+                    nzTheme="outline">
+                  </span>
+
+                  Sign in
+
+                } @else {
+
+                  Signing in...
+
+                }
+
+              </button>
+
+            </nz-form-control>
+
+          </nz-form-item>
 
         </form>
 
 
-        <div class="register-link">
+        <!-- Register -->
 
+        <div class="register-section">
+
+          <span>
             Don't have an account?
+          </span>
 
-            <a routerLink="/register">
-                Create Account
-            </a>
+          <a routerLink="/register">
+            Create an account
+            <span
+              nz-icon
+              nzType="arrow-right"
+              nzTheme="outline">
+            </span>
+          </a>
 
         </div>
 
+
+        <!-- Bottom security -->
+
+        <div class="security-note">
+
+          <span
+            nz-icon
+            nzType="safety-certificate"
+            nzTheme="outline">
+          </span>
+
+          <span>
+            Secure login protected with encryption
+          </span>
+
+        </div>
+
+      </div>
+
     </div>
+
+  </div>
 
 </div>
