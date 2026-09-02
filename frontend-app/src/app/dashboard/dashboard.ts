@@ -1024,6 +1024,79 @@ next: (data: any) => {
   }
 
 
+  // =====================================================
+// EXPORT CONVERSATION PDF
+// =====================================================
+
+exportConversationPdf(): void {
+
+  if (!this.conversationId) {
+
+    console.warn(
+      'No conversation selected'
+    );
+
+    return;
+
+  }
+
+
+  this.chatService
+    .exportConversationPdf(
+      this.conversationId
+    )
+    .subscribe({
+
+      next: (
+        blob: Blob
+      ) => {
+
+        const url =
+          window.URL.createObjectURL(
+            blob
+          );
+
+
+        const anchor =
+          document.createElement(
+            'a'
+          );
+
+
+        anchor.href =
+          url;
+
+
+        anchor.download =
+          'ai-conversation.pdf';
+
+
+        anchor.click();
+
+
+        window.URL.revokeObjectURL(
+          url
+        );
+
+      },
+
+
+      error: (
+        error
+      ) => {
+
+        console.error(
+          'PDF export failed:',
+          error
+        );
+
+      }
+
+    });
+
+}
+
+
   /*
    * ==========================================
    * NEW CHAT

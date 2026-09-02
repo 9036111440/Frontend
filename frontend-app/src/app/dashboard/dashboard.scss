@@ -2386,6 +2386,68 @@
 }
 
 
+.export-pdf-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  height: 34px;
+  padding: 0 12px;
+
+  border: 1px solid #e4e7ef;
+  border-radius: 9px;
+
+  background: #ffffff;
+  color: #626878;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+.export-pdf-button:hover:not(:disabled) {
+  background: #f7f7ff;
+  color: #6557df;
+  border-color: #dcdafa;
+
+  transform: translateY(-1px);
+}
+
+
+.export-pdf-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+
+.export-pdf-button [nz-icon] {
+  font-size: 14px;
+}
+
+
+@media (max-width: 700px) {
+
+  .export-pdf-button span:last-child {
+    display: none;
+  }
+
+  .export-pdf-button {
+    width: 34px;
+    padding: 0;
+    justify-content: center;
+  }
+
+}
+
+
 /* =========================================================
    ACTION BUTTON
    ========================================================= */

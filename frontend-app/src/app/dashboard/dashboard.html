@@ -429,6 +429,22 @@
 
 
       <div class="header-right">
+        <button
+  type="button"
+  class="export-pdf-button"
+  title="Export conversation as PDF"
+  (click)="exportConversationPdf()"
+  [disabled]="!conversationId || messages.length === 0"
+>
+  <span
+    nz-icon
+    nzType="file-pdf"
+  ></span>
+
+  <span>
+    Export PDF
+  </span>
+</button>
 
         @if (isPro) {
 
