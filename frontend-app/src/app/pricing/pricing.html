@@ -1,89 +1,383 @@
-<div class="pricing-container">
+<div class="pricing-page">
 
-  <h1>
-    Choose your plan
-  </h1>
+  <!-- Background decoration -->
 
-  <p class="subtitle">
-    Start chatting for free or upgrade to Pro.
-  </p>
+  <div class="bg-orb orb-one"></div>
+  <div class="bg-orb orb-two"></div>
 
+
+  <!-- ========================================= -->
+  <!-- HEADER -->
+  <!-- ========================================= -->
+
+  <div class="pricing-header">
+
+    <div class="mini-brand">
+
+      <div class="brand-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <span>AI Chatbot</span>
+
+    </div>
+
+
+    <div class="eyebrow">
+      SIMPLE • POWERFUL • AI
+    </div>
+
+
+    <h1>
+      Choose the plan that
+      <span>works for you</span>
+    </h1>
+
+
+    <p class="subtitle">
+      Start exploring AI for free, or unlock the full experience
+      with unlimited conversations.
+    </p>
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- PLANS -->
+  <!-- ========================================= -->
 
   <div class="plans">
 
 
-    <!-- DEMO -->
+    <!-- ======================================= -->
+    <!-- DEMO PLAN -->
+    <!-- ======================================= -->
 
-    <nz-card
-      nzTitle="Demo"
-      class="plan-card"
-    >
+    <div class="plan-card demo-card">
 
-      <div class="price">
+      <div class="plan-top">
 
-        Free
+        <div>
+
+          <div class="plan-icon demo-icon">
+
+            <span
+              nz-icon
+              nzType="rocket"
+              nzTheme="outline">
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="plan-name">
+
+          <span class="small-label">
+            GET STARTED
+          </span>
+
+          <h2>
+            Demo
+          </h2>
+
+        </div>
 
       </div>
 
-      <ul>
 
-        <li>3 messages per conversation</li>
+      <div class="price-section">
 
-        <li>AI Chat</li>
+        <span class="currency">
+          ₹
+        </span>
 
-        <li>Conversation history</li>
+        <span class="price">
+          0
+        </span>
 
-        <li>PDF questions</li>
+        <span class="price-label">
+          forever
+        </span>
+
+      </div>
+
+
+      <p class="plan-description">
+        A simple way to experience what your AI assistant can do.
+      </p>
+
+
+      <div class="divider"></div>
+
+
+      <div class="includes">
+        What's included
+      </div>
+
+
+      <ul class="features">
+
+        <li>
+          <span class="feature-check">
+            <span
+              nz-icon
+              nzType="check"
+              nzTheme="outline">
+            </span>
+          </span>
+
+          <span>
+            3 messages per conversation
+          </span>
+        </li>
+
+
+        <li>
+          <span class="feature-check">
+            <span
+              nz-icon
+              nzType="check"
+              nzTheme="outline">
+            </span>
+          </span>
+
+          <span>
+            AI-powered chat
+          </span>
+        </li>
+
+
+        <li>
+          <span class="feature-check">
+            <span
+              nz-icon
+              nzType="check"
+              nzTheme="outline">
+            </span>
+          </span>
+
+          <span>
+            Conversation history
+          </span>
+        </li>
+
+
+        <li>
+          <span class="feature-check">
+            <span
+              nz-icon
+              nzType="check"
+              nzTheme="outline">
+            </span>
+          </span>
+
+          <span>
+            Ask questions from PDFs
+          </span>
+        </li>
 
       </ul>
+
 
       <button
         nz-button
         nzBlock
+        nzSize="large"
+        class="current-plan-btn"
       >
+
+        <span
+          nz-icon
+          nzType="check-circle"
+          nzTheme="outline">
+        </span>
+
         Current Plan
+
       </button>
 
-    </nz-card>
+    </div>
 
 
-    <!-- PRO -->
+    <!-- ======================================= -->
+    <!-- PRO PLAN -->
+    <!-- ======================================= -->
 
-    <nz-card
-      nzTitle="Pro"
-      class="plan-card pro-card"
-    >
+    <div class="plan-card pro-card">
 
-      <nz-tag nzColor="blue">
+      <!-- Popular badge -->
+
+      <div class="popular-badge">
+
+        <span
+          nz-icon
+          nzType="star"
+          nzTheme="fill">
+        </span>
+
         RECOMMENDED
-      </nz-tag>
-
-
-      <div class="price">
-
-        ₹99
 
       </div>
 
 
-      <div class="period">
+      <div class="plan-glow"></div>
 
-        One-time demo payment
+
+      <div class="plan-top">
+
+        <div>
+
+          <div class="plan-icon pro-icon">
+
+            <span
+              nz-icon
+              nzType="thunderbolt"
+              nzTheme="fill">
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="plan-name">
+
+          <span class="small-label">
+            UNLOCK EVERYTHING
+          </span>
+
+          <h2>
+            Pro
+          </h2>
+
+        </div>
 
       </div>
 
 
-      <ul>
+      <div class="price-section">
 
-        <li>Unlimited messages</li>
+        <span class="currency">
+          ₹
+        </span>
 
-        <li>AI Chat</li>
+        <span class="price">
+          99
+        </span>
 
-        <li>Conversation history</li>
+        <span class="price-label">
+          one-time
+        </span>
 
-        <li>PDF questions</li>
+      </div>
 
-        <li>Image questions</li>
+
+      <p class="plan-description">
+        Unlock unlimited conversations and all AI features
+        with a single demo payment.
+      </p>
+
+
+      <div class="payment-note">
+
+        <span
+          nz-icon
+          nzType="safety-certificate"
+          nzTheme="outline">
+        </span>
+
+        Secure payment powered by Razorpay
+
+      </div>
+
+
+      <div class="divider"></div>
+
+
+      <div class="includes">
+        Everything in Demo, plus
+      </div>
+
+
+      <ul class="features">
+
+        <li>
+          <span class="feature-check">
+            <span
+              nz-icon
+              nzType="check"
+              nzTheme="outline">
+            </span>
+          </span>
+
+          <span>
+            Unlimited messages
+          </span>
+        </li>
+
+
+        <li>
+          <span class="feature-check">
+            <span
+              nz-icon
+              nzType="check"
+              nzTheme="outline">
+            </span>
+          </span>
+
+          <span>
+            AI-powered chat
+          </span>
+        </li>
+
+
+        <li>
+          <span class="feature-check">
+            <span
+              nz-icon
+              nzType="check"
+              nzTheme="outline">
+            </span>
+          </span>
+
+          <span>
+            Conversation history
+          </span>
+        </li>
+
+
+        <li>
+          <span class="feature-check">
+            <span
+              nz-icon
+              nzType="check"
+              nzTheme="outline">
+            </span>
+          </span>
+
+          <span>
+            PDF questions
+          </span>
+        </li>
+
+
+        <li>
+          <span class="feature-check">
+            <span
+              nz-icon
+              nzType="check"
+              nzTheme="outline">
+            </span>
+          </span>
+
+          <span>
+            Image questions
+          </span>
+        </li>
 
       </ul>
 
@@ -91,17 +385,97 @@
       <button
         nz-button
         nzType="primary"
+        nzSize="large"
         nzBlock
+        class="upgrade-btn"
         [nzLoading]="isLoading"
+        [disabled]="isLoading"
         (click)="upgradeToPro()"
       >
 
-        Upgrade to Pro
+        @if (!isLoading) {
+
+          <span
+            nz-icon
+            nzType="thunderbolt"
+            nzTheme="fill">
+          </span>
+
+          Upgrade to Pro
+
+        } @else {
+
+          Processing payment...
+
+        }
 
       </button>
 
-    </nz-card>
 
+      <div class="payment-caption">
+
+        One-time demo payment • No recurring billing
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- FOOTER -->
+  <!-- ========================================= -->
+
+  <div class="pricing-footer">
+
+    <div class="footer-item">
+
+      <span
+        nz-icon
+        nzType="safety-certificate"
+        nzTheme="outline">
+      </span>
+
+      Secure payments
+
+    </div>
+
+
+    <div class="footer-dot">
+      •
+    </div>
+
+
+    <div class="footer-item">
+
+      <span
+        nz-icon
+        nzType="thunderbolt"
+        nzTheme="outline">
+      </span>
+
+      Instant activation
+
+    </div>
+
+
+    <div class="footer-dot">
+      •
+    </div>
+
+
+    <div class="footer-item">
+
+      <span
+        nz-icon
+        nzType="robot"
+        nzTheme="outline">
+      </span>
+
+      AI powered
+
+    </div>
 
   </div>
 
