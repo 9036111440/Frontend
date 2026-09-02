@@ -1,98 +1,177 @@
 <div class="chat-container">
 
-  <!-- ========================================= -->
-  <!-- SIDEBAR -->
-  <!-- ========================================= -->
+  <!-- =====================================================
+       SIDEBAR
+       ===================================================== -->
 
   <aside class="sidebar">
 
-    <!-- Sidebar Header -->
+    <!-- BRAND -->
 
-    <div class="sidebar-header">
+    <div class="sidebar-top">
 
-      <h2>
-        AI Chat
-      </h2>
+      <div class="brand">
 
+        <div class="brand-logo">
+          ✦
+        </div>
+
+        <div class="brand-name">
+          AI Chat
+        </div>
+
+      </div>
+
+
+      <!-- NEW CHAT -->
 
       <button
-        nz-button
-        nzType="primary"
-        nzBlock
+        class="new-chat-button"
         (click)="newChat()"
       >
 
-        + New Chat
+        <span class="new-chat-icon">
+          +
+        </span>
+
+        <span>
+          New chat
+        </span>
 
       </button>
 
     </div>
 
 
-    <!-- Recent Chats -->
+    <!-- =================================================
+         RECENT CHATS
+         ================================================= -->
 
-    <div class="recent-title">
+    <div class="recent-section">
 
-      Recent Chats
+      <div class="recent-header">
 
-    </div>
+        <span>
+          Recent
+        </span>
+
+        <span class="recent-count">
+          {{ conversations.length }}
+        </span>
+
+      </div>
 
 
-    <div class="conversation-list">
+      <div class="conversation-list">
 
-      @for (
-        conversation of conversations;
-        track conversation.id
-      ) {
+        @for (
+          conversation of conversations;
+          track conversation.id
+        ) {
 
-        <button
-          class="conversation-item"
-          (click)="openConversation(conversation)"
-        >
+          <button
+            class="conversation-item"
 
-          <span
-            class="conversation-title"
+            [class.active]="
+              conversation.id === conversationId
+            "
+
+            (click)="
+              openConversation(conversation)
+            "
           >
 
-            {{ conversation.title }}
+            <div class="conversation-icon">
 
-          </span>
+              <span
+                nz-icon
+                nzType="message"
+              ></span>
 
-        </button>
-
-      }
+            </div>
 
 
-      @if (
-        conversations.length === 0
-      ) {
+            <div class="conversation-details">
 
-        <div class="empty-history">
+              <span class="conversation-title">
 
-          No conversations yet.
+                {{ conversation.title }}
 
-        </div>
+              </span>
 
-      }
+
+              <span class="conversation-meta">
+
+                {{ conversation.messageCount }}
+                {{ conversation.messageCount === 1 ? 'message' : 'messages' }}
+
+              </span>
+
+            </div>
+
+
+            @if (
+              conversation.id === conversationId
+            ) {
+
+              <span
+                class="active-indicator"
+              ></span>
+
+            }
+
+          </button>
+
+        }
+
+
+        @if (
+          conversations.length === 0
+        ) {
+
+          <div class="empty-history">
+
+            <div class="empty-icon">
+              <span
+                nz-icon
+                nzType="message"
+              ></span>
+            </div>
+
+            <strong>
+              No conversations yet
+            </strong>
+
+            <span>
+              Start a new chat to see it here.
+            </span>
+
+          </div>
+
+        }
+
+      </div>
 
     </div>
 
 
-    <!-- ========================================= -->
-    <!-- USER PROFILE -->
-    <!-- ========================================= -->
+    <!-- =================================================
+         SIDEBAR FOOTER / USER
+         ================================================= -->
 
     @if (user) {
 
       <div class="user-profile-wrapper">
 
-        <!-- Popup -->
+        <!-- =============================================
+             USER MENU POPUP
+             ============================================= -->
 
         @if (showUserMenu) {
 
           <div class="user-menu">
 
-            <!-- User information -->
+            <!-- USER HEADER -->
 
             <div class="user-menu-header">
 
@@ -118,33 +197,37 @@
             </div>
 
 
-            <!-- Plan -->
+            <!-- PLAN -->
 
             <div class="plan-section">
 
               <div class="plan-row">
 
-                <span>
-                  Plan
+                <span class="plan-title">
+                  Subscription
                 </span>
 
 
                 @if (isPro) {
 
-                  <span
-                    class="plan-badge pro"
-                  >
+                  <span class="plan-badge pro">
+
+                    <span class="plan-dot"></span>
+
                     PRO
+
                   </span>
 
                 }
 
                 @else {
 
-                  <span
-                    class="plan-badge demo"
-                  >
+                  <span class="plan-badge demo">
+
+                    <span class="plan-dot"></span>
+
                     DEMO
+
                   </span>
 
                 }
@@ -155,14 +238,22 @@
               @if (!isPro) {
 
                 <button
-                  nz-button
-                  nzType="primary"
-                  nzBlock
                   class="upgrade-button"
                   (click)="upgradeToPro()"
                 >
 
-                  Upgrade to Pro
+                  <span
+                    nz-icon
+                    nzType="crown"
+                  ></span>
+
+                  <span>
+                    Upgrade to Pro
+                  </span>
+
+                  <span class="upgrade-arrow">
+                    →
+                  </span>
 
                 </button>
 
@@ -170,32 +261,38 @@
 
             </div>
 
-            <!-- ===================================== -->
-<!-- ADMIN PANEL -->
-<!-- ===================================== -->
 
-@if (isAdmin) {
+            <!-- ADMIN -->
 
-  <button
-    class="admin-panel-button"
-    (click)="openAdminPanel()"
-  >
+            @if (isAdmin) {
 
-    <span
-      nz-icon
-      nzType="dashboard"
-    ></span>
+              <button
+                class="menu-action admin-action"
+                (click)="openAdminPanel()"
+              >
 
-    Admin Panel
+                <span
+                  nz-icon
+                  nzType="dashboard"
+                ></span>
 
-  </button>
+                <span>
+                  Admin Panel
+                </span>
 
-}
+                <span class="action-arrow">
+                  →
+                </span>
 
-            <!-- Logout -->
+              </button>
+
+            }
+
+
+            <!-- LOGOUT -->
 
             <button
-              class="menu-logout"
+              class="menu-action logout-action"
               (click)="logout()"
             >
 
@@ -204,7 +301,9 @@
                 nzType="logout"
               ></span>
 
-              Logout
+              <span>
+                Logout
+              </span>
 
             </button>
 
@@ -213,9 +312,9 @@
         }
 
 
-        <!-- ===================================== -->
-        <!-- PROFILE BUTTON -->
-        <!-- ===================================== -->
+        <!-- =============================================
+             USER BUTTON
+             ============================================= -->
 
         <button
           class="user-profile"
@@ -240,11 +339,15 @@
 
               @if (isPro) {
 
+                <span class="sidebar-pro-dot"></span>
+
                 Pro plan
 
               }
 
               @else {
+
+                <span class="sidebar-demo-dot"></span>
 
                 Demo plan
 
@@ -257,11 +360,13 @@
 
           <span
             nz-icon
+
             [nzType]="
               showUserMenu
                 ? 'up'
                 : 'down'
             "
+
             class="profile-arrow"
           ></span>
 
@@ -274,38 +379,97 @@
   </aside>
 
 
-  <!-- ========================================= -->
-  <!-- MAIN CHAT -->
-  <!-- ========================================= -->
+  <!-- =====================================================
+       MAIN CONTENT
+       ===================================================== -->
 
   <main class="chat-main">
 
 
-    <!-- Header -->
+    <!-- ===================================================
+         TOP HEADER
+         =================================================== -->
 
-<header class="chat-header">
+    <header class="chat-header">
 
-  <div>
+      <div class="header-left">
 
-    <h2>
-      AI Assistant
-    </h2>
+        <div class="ai-status">
 
-    <small>
-      Welcome back
-    </small>
+          <span class="status-dot"></span>
 
-  </div>
+          <span>
+            AI Assistant
+          </span>
 
-</header>
+        </div>
 
 
-    <!-- ========================================= -->
-    <!-- MESSAGES -->
-    <!-- ========================================= -->
+        <span class="header-divider">
+          /
+        </span>
 
-    <div class="messages-container">
 
+        <span class="header-chat-title">
+
+          @if (conversationId) {
+
+            Chat
+
+          }
+          @else {
+
+            New conversation
+
+          }
+
+        </span>
+
+      </div>
+
+
+      <div class="header-right">
+
+        @if (isPro) {
+
+          <div class="header-plan pro">
+
+            <span
+              nz-icon
+              nzType="crown"
+            ></span>
+
+            Pro
+
+          </div>
+
+        }
+
+        @else {
+
+          <div class="header-plan demo">
+
+            Demo
+
+          </div>
+
+        }
+
+      </div>
+
+    </header>
+
+
+    <!-- ===================================================
+         CHAT BODY
+         =================================================== -->
+
+    <section class="messages-container">
+
+
+      <!-- ================================================
+           EMPTY / WELCOME SCREEN
+           ================================================ -->
 
       @if (
         messages.length === 0
@@ -313,18 +477,127 @@
 
         <div class="welcome">
 
+          <div class="welcome-glow"></div>
+
+
+          <div class="welcome-icon">
+
+            <div class="welcome-icon-inner">
+              ✦
+            </div>
+
+          </div>
+
+
           <h1>
+
             How can I help you?
+
           </h1>
 
+
           <p>
-            Ask me anything.
+
+            Ask a question, upload a PDF,
+            or attach an image to get started.
+
           </p>
+
+
+          <!-- SUGGESTIONS -->
+
+          <div class="suggestions">
+
+            <button
+              class="suggestion-card"
+              (click)="message = 'Explain this topic to me simply.'"
+            >
+
+              <span class="suggestion-icon blue">
+
+                <span
+                  nz-icon
+                  nzType="bulb"
+                ></span>
+
+              </span>
+
+              <span class="suggestion-text">
+
+                Explain something
+
+              </span>
+
+              <span class="suggestion-arrow">
+                →
+              </span>
+
+            </button>
+
+
+            <button
+              class="suggestion-card"
+              (click)="message = 'Summarize this document.'"
+            >
+
+              <span class="suggestion-icon purple">
+
+                <span
+                  nz-icon
+                  nzType="file-text"
+                ></span>
+
+              </span>
+
+              <span class="suggestion-text">
+
+                Summarize a document
+
+              </span>
+
+              <span class="suggestion-arrow">
+                →
+              </span>
+
+            </button>
+
+
+            <button
+              class="suggestion-card"
+              (click)="message = 'Analyze this image for me.'"
+            >
+
+              <span class="suggestion-icon orange">
+
+                <span
+                  nz-icon
+                  nzType="picture"
+                ></span>
+
+              </span>
+
+              <span class="suggestion-text">
+
+                Analyze an image
+
+              </span>
+
+              <span class="suggestion-arrow">
+                →
+              </span>
+
+            </button>
+
+          </div>
 
         </div>
 
       }
 
+
+      <!-- ================================================
+           CHAT MESSAGES
+           ================================================ -->
 
       @for (
         msg of messages;
@@ -332,39 +605,92 @@
       ) {
 
         <div
-          class="message-row"
+          class="message-wrapper"
 
-          [class.user-message]="
+          [class.user-wrapper]="
             msg.role === 'user'
           "
 
-          [class.ai-message]="
+          [class.ai-wrapper]="
             msg.role === 'assistant'
           "
         >
 
-          <div class="avatar">
-
-            @if (
-              msg.role === 'user'
-            ) {
-
-              You
-
-            }
-
-            @else {
-
-              AI
-
-            }
-
-          </div>
+          <div class="message-row">
 
 
-          <div class="message-content">
+            <!-- AVATAR -->
 
-            {{ msg.content }}
+            <div
+              class="message-avatar"
+
+              [class.user-avatar]="
+                msg.role === 'user'
+              "
+
+              [class.ai-avatar]="
+                msg.role === 'assistant'
+              "
+            >
+
+              @if (
+                msg.role === 'user'
+              ) {
+
+                {{ userInitials }}
+
+              }
+
+              @else {
+
+                ✦
+
+              }
+
+            </div>
+
+
+            <!-- MESSAGE -->
+
+            <div class="message-body">
+
+
+              <div class="message-author">
+
+                @if (
+                  msg.role === 'user'
+                ) {
+
+                  You
+
+                }
+
+                @else {
+
+                  AI Assistant
+
+                }
+
+              </div>
+
+
+              <div
+                class="message-content"
+
+                [class.user-content]="
+                  msg.role === 'user'
+                "
+
+                [class.ai-content]="
+                  msg.role === 'assistant'
+                "
+              >
+
+                {{ msg.content }}
+
+              </div>
+
+            </div>
 
           </div>
 
@@ -373,7 +699,9 @@
       }
 
 
-      <!-- Thinking -->
+      <!-- ================================================
+           THINKING
+           ================================================ -->
 
       @if (
         isLoading &&
@@ -383,26 +711,39 @@
         ]?.role === 'user'
       ) {
 
-        <div
-          class="message-row ai-message"
-        >
+        <div class="message-wrapper ai-wrapper">
 
-          <div class="avatar">
+          <div class="message-row">
 
-            AI
-
-          </div>
-
-
-          <div class="message-content">
-
-            <span
-              class="thinking"
+            <div
+              class="message-avatar ai-avatar"
             >
 
-              Thinking...
+              ✦
 
-            </span>
+            </div>
+
+
+            <div class="message-body">
+
+              <div class="message-author">
+
+                AI Assistant
+
+              </div>
+
+
+              <div class="thinking-container">
+
+                <span class="thinking-dot"></span>
+
+                <span class="thinking-dot"></span>
+
+                <span class="thinking-dot"></span>
+
+              </div>
+
+            </div>
 
           </div>
 
@@ -410,39 +751,74 @@
 
       }
 
-    </div>
+    </section>
 
 
-    <!-- ========================================= -->
-    <!-- COMPOSER -->
-    <!-- ========================================= -->
+    <!-- ===================================================
+         COMPOSER
+         =================================================== -->
 
-    <div
-      class="composer-container"
-    >
+    <div class="composer-area">
 
+
+      <!-- SELECTED FILE -->
 
       @if (selectedFile) {
 
-        <div
-          class="selected-file"
-        >
+        <div class="selected-file">
 
-          <span>
+          <div class="file-info">
 
-            📎
-            {{ selectedFile.name }}
+            <div class="file-icon">
 
-          </span>
+              @if (
+                selectedFile.type === 'application/pdf'
+              ) {
+
+                <span
+                  nz-icon
+                  nzType="file-pdf"
+                ></span>
+
+              }
+
+              @else {
+
+                <span
+                  nz-icon
+                  nzType="paper-clip"
+                ></span>
+
+              }
+
+            </div>
+
+
+            <div class="file-details">
+
+              <strong>
+                {{ selectedFile.name }}
+              </strong>
+
+              <span>
+                Ready to send
+              </span>
+
+            </div>
+
+          </div>
 
 
           <button
-            nz-button
-            nzType="text"
+            class="remove-file"
             (click)="removeFile()"
+            type="button"
           >
 
-            ×
+            <span
+              nz-icon
+              nzType="close"
+            ></span>
 
           </button>
 
@@ -451,60 +827,84 @@
       }
 
 
-      <div class="composer">
+      <!-- COMPOSER -->
+
+      <div class="composer-wrapper">
+
+        <div class="composer">
 
 
-        <!-- Attachment -->
+          <!-- ATTACHMENT -->
 
-        <label
-          class="attachment-button"
-          title="Attach file"
-        >
+          <label
+            class="composer-action"
+            title="Attach file"
+          >
 
-          📎
-
-
-          <input
-            type="file"
-            hidden
-            (change)="selectFile($event)"
-            accept="image/*,.pdf,.txt,.doc,.docx"
-          />
-
-        </label>
+            <span
+              nz-icon
+              nzType="paper-clip"
+            ></span>
 
 
-        <!-- Message -->
+            <input
+              type="file"
+              hidden
+              (change)="selectFile($event)"
+              accept="image/*,.pdf,.txt,.doc,.docx"
+            />
 
-        <textarea
-          nz-input
-          [(ngModel)]="message"
-          placeholder="Message AI..."
-          rows="1"
-          (keyup.enter)="sendMessage()"
-        ></textarea>
+          </label>
 
 
-        <!-- Send -->
+          <!-- TEXT -->
 
-        <button
-          nz-button
-          nzType="primary"
+          <textarea
+            nz-input
+            [(ngModel)]="message"
+            placeholder="Message AI..."
+            rows="1"
+            (keyup.enter)="sendMessage()"
+          ></textarea>
 
-          [disabled]="
-            isLoading ||
-            (
-              !message.trim() &&
-              !selectedFile
-            )
-          "
 
-          (click)="sendMessage()"
-        >
+          <!-- SEND -->
 
-          Send
+          <button
+            class="send-button"
 
-        </button>
+            [class.active]="
+              message.trim() ||
+              selectedFile
+            "
+
+            [disabled]="
+              isLoading ||
+              (
+                !message.trim() &&
+                !selectedFile
+              )
+            "
+
+            (click)="sendMessage()"
+          >
+
+            <span
+              nz-icon
+              nzType="arrow-up"
+            ></span>
+
+          </button>
+
+        </div>
+
+
+        <div class="composer-hint">
+
+          AI can make mistakes.
+          Check important information.
+
+        </div>
 
       </div>
 

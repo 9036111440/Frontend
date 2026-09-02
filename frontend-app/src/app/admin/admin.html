@@ -2,50 +2,68 @@
 
   <!-- HEADER -->
 
-  <div class="admin-header">
+<div class="admin-header">
 
-    <div>
+  <div class="admin-title-area">
 
-      <h1>
-        Admin Dashboard
-      </h1>
+    <div class="admin-kicker">
 
-      <p>
-        Monitor users, conversations, subscriptions and AI usage.
-      </p>
+      <span class="admin-status-dot"></span>
+
+      ADMIN CONSOLE
 
     </div>
 
 
-    <div class="header-actions">
-
-      <button
-        nz-button
-        nzType="default"
-        (click)="refresh()"
-        [disabled]="isLoading"
-      >
-
-        <span nz-icon nzType="reload"></span>
-
-        Refresh
-
-      </button>
+    <h1>
+      Admin Dashboard
+    </h1>
 
 
-      <a
-        nz-button
-        nzType="default"
-        routerLink="/dashboard"
-      >
-
-        Back to Chat
-
-      </a>
-
-    </div>
+    <p>
+      Monitor users, conversations, subscriptions and AI usage.
+    </p>
 
   </div>
+
+
+  <div class="header-actions">
+
+    <button
+      nz-button
+      nzType="default"
+      (click)="refresh()"
+      [disabled]="isLoading"
+    >
+
+      <span
+        nz-icon
+        nzType="reload"
+      ></span>
+
+      Refresh
+
+    </button>
+
+
+    <a
+      nz-button
+      nzType="default"
+      routerLink="/dashboard"
+    >
+
+      <span
+        nz-icon
+        nzType="arrow-left"
+      ></span>
+
+      Back to Chat
+
+    </a>
+
+  </div>
+
+</div>
 
 
   <!-- LOADING -->
