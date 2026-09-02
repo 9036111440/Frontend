@@ -703,6 +703,43 @@
   height: 38px;
 }
 
+/* =====================================================
+   ADMIN PANEL
+   ===================================================== */
+
+.admin-panel-button {
+
+  width: 100%;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 12px 15px;
+
+  border: none;
+
+  background: #ffffff;
+
+  cursor: pointer;
+
+  text-align: left;
+
+  font-size: 13px;
+
+  color: #1677ff;
+
+}
+
+
+.admin-panel-button:hover {
+
+  background: #f0f5ff;
+
+}
+
 
 /* =====================================================
    SCROLLBARS

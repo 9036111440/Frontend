@@ -85,7 +85,7 @@ interface User {
 
   plan: 'demo' | 'pro';
 
-  role?: 'user' | 'admin';
+  role: 'user' | 'admin';
 
 }
 
@@ -318,6 +318,12 @@ export class Dashboard
 
   }
 
+  get isAdmin(): boolean {
+
+  return this.user?.role === 'admin';
+
+}
+
 
   /*
    * ==========================================
@@ -363,6 +369,22 @@ export class Dashboard
     ]);
 
   }
+
+  /*
+ * ==========================================
+ * ADMIN PANEL
+ * ==========================================
+ */
+
+openAdminPanel(): void {
+
+  this.closeUserMenu();
+
+  this.router.navigate([
+    '/admin'
+  ]);
+
+}
 
 
   /*

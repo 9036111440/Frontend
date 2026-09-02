@@ -170,6 +170,27 @@
 
             </div>
 
+            <!-- ===================================== -->
+<!-- ADMIN PANEL -->
+<!-- ===================================== -->
+
+@if (isAdmin) {
+
+  <button
+    class="admin-panel-button"
+    (click)="openAdminPanel()"
+  >
+
+    <span
+      nz-icon
+      nzType="dashboard"
+    ></span>
+
+    Admin Panel
+
+  </button>
+
+}
 
             <!-- Logout -->
 
