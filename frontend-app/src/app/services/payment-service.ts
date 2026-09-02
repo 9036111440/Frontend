@@ -3,13 +3,17 @@ import {
 } from '@angular/core';
 
 import {
-  HttpClient
+  HttpClient,
+  HttpHeaders
 } from '@angular/common/http';
 
 import {
   Observable
 } from 'rxjs';
-import { environment } from '../environments/environment';
+
+import {
+  environment
+} from '../environments/environment';
 
 
 @Injectable({
@@ -28,9 +32,31 @@ export class PaymentService {
 
   createOrder(): Observable<any> {
 
+    const token =
+      localStorage.getItem(
+        'accessToken'
+      );
+
+
+    const headers =
+      new HttpHeaders({
+
+        Authorization:
+          `Bearer ${token}`
+
+      });
+
+
     return this.http.post(
+
       `${this.apiUrl}/create-order`,
-      {}
+
+      {},
+
+      {
+        headers
+      }
+
     );
 
   }
@@ -40,9 +66,31 @@ export class PaymentService {
     paymentResponse: any
   ): Observable<any> {
 
+    const token =
+      localStorage.getItem(
+        'accessToken'
+      );
+
+
+    const headers =
+      new HttpHeaders({
+
+        Authorization:
+          `Bearer ${token}`
+
+      });
+
+
     return this.http.post(
+
       `${this.apiUrl}/verify`,
-      paymentResponse
+
+      paymentResponse,
+
+      {
+        headers
+      }
+
     );
 
   }
@@ -50,10 +98,32 @@ export class PaymentService {
 
   getPlan(): Observable<any> {
 
+    const token =
+      localStorage.getItem(
+        'accessToken'
+      );
+
+
+    const headers =
+      new HttpHeaders({
+
+        Authorization:
+          `Bearer ${token}`
+
+      });
+
+
     return this.http.get(
-      `${this.apiUrl}/plan`
+
+      `${this.apiUrl}/plan`,
+
+      {
+        headers
+      }
+
     );
 
   }
 
 }
+

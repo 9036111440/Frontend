@@ -1,134 +1,460 @@
 <div class="chat-container">
 
-  <!-- Sidebar -->
+  <!-- ========================================= -->
+  <!-- SIDEBAR -->
+  <!-- ========================================= -->
+
   <aside class="sidebar">
+
+    <!-- Sidebar Header -->
+
     <div class="sidebar-header">
-      <h2>AI Chat</h2>
+
+      <h2>
+        AI Chat
+      </h2>
+
+
       <button
         nz-button
         nzType="primary"
         nzBlock
         (click)="newChat()"
       >
+
         + New Chat
+
       </button>
+
     </div>
+
+
+    <!-- Recent Chats -->
 
     <div class="recent-title">
+
       Recent Chats
+
     </div>
 
+
     <div class="conversation-list">
-      @for (conversation of conversations; track conversation.id) {
+
+      @for (
+        conversation of conversations;
+        track conversation.id
+      ) {
+
         <button
           class="conversation-item"
           (click)="openConversation(conversation)"
         >
-          <span class="conversation-title">
+
+          <span
+            class="conversation-title"
+          >
+
             {{ conversation.title }}
+
           </span>
+
         </button>
+
       }
 
-      @if (conversations.length === 0) {
+
+      @if (
+        conversations.length === 0
+      ) {
+
         <div class="empty-history">
+
           No conversations yet.
+
         </div>
+
       }
+
     </div>
+
+
+    <!-- ========================================= -->
+    <!-- USER PROFILE -->
+    <!-- ========================================= -->
+
+    @if (user) {
+
+      <div class="user-profile-wrapper">
+
+        <!-- Popup -->
+
+        @if (showUserMenu) {
+
+          <div class="user-menu">
+
+            <!-- User information -->
+
+            <div class="user-menu-header">
+
+              <div class="profile-avatar large">
+
+                {{ userInitials }}
+
+              </div>
+
+
+              <div class="user-menu-user">
+
+                <strong>
+                  {{ fullName }}
+                </strong>
+
+                <span>
+                  {{ user.email }}
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <!-- Plan -->
+
+            <div class="plan-section">
+
+              <div class="plan-row">
+
+                <span>
+                  Plan
+                </span>
+
+
+                @if (isPro) {
+
+                  <span
+                    class="plan-badge pro"
+                  >
+                    PRO
+                  </span>
+
+                }
+
+                @else {
+
+                  <span
+                    class="plan-badge demo"
+                  >
+                    DEMO
+                  </span>
+
+                }
+
+              </div>
+
+
+              @if (!isPro) {
+
+                <button
+                  nz-button
+                  nzType="primary"
+                  nzBlock
+                  class="upgrade-button"
+                  (click)="upgradeToPro()"
+                >
+
+                  Upgrade to Pro
+
+                </button>
+
+              }
+
+            </div>
+
+
+            <!-- Logout -->
+
+            <button
+              class="menu-logout"
+              (click)="logout()"
+            >
+
+              <span
+                nz-icon
+                nzType="logout"
+              ></span>
+
+              Logout
+
+            </button>
+
+          </div>
+
+        }
+
+
+        <!-- ===================================== -->
+        <!-- PROFILE BUTTON -->
+        <!-- ===================================== -->
+
+        <button
+          class="user-profile"
+          (click)="toggleUserMenu()"
+        >
+
+          <div class="profile-avatar">
+
+            {{ userInitials }}
+
+          </div>
+
+
+          <div class="profile-info">
+
+            <strong>
+              {{ fullName }}
+            </strong>
+
+
+            <span>
+
+              @if (isPro) {
+
+                Pro plan
+
+              }
+
+              @else {
+
+                Demo plan
+
+              }
+
+            </span>
+
+          </div>
+
+
+          <span
+            nz-icon
+            [nzType]="
+              showUserMenu
+                ? 'up'
+                : 'down'
+            "
+            class="profile-arrow"
+          ></span>
+
+        </button>
+
+      </div>
+
+    }
+
   </aside>
 
-  <!-- Main Chat -->
+
+  <!-- ========================================= -->
+  <!-- MAIN CHAT -->
+  <!-- ========================================= -->
+
   <main class="chat-main">
 
-    <!-- Header -->
-    <header class="chat-header">
-      <h2>AI Assistant</h2>
-       <button
-    nz-button
-    nzType="primary"
-    routerLink="/pricing"
-  >
-    ⭐ Upgrade Pro
-  </button>
-    </header>
 
-    <!-- Messages -->
+    <!-- Header -->
+
+<header class="chat-header">
+
+  <div>
+
+    <h2>
+      AI Assistant
+    </h2>
+
+    <small>
+      Welcome back
+    </small>
+
+  </div>
+
+</header>
+
+
+    <!-- ========================================= -->
+    <!-- MESSAGES -->
+    <!-- ========================================= -->
+
     <div class="messages-container">
-      @if (messages.length === 0) {
+
+
+      @if (
+        messages.length === 0
+      ) {
+
         <div class="welcome">
-          <h1>How can I help you?</h1>
-          <p>Ask me anything.</p>
+
+          <h1>
+            How can I help you?
+          </h1>
+
+          <p>
+            Ask me anything.
+          </p>
+
         </div>
+
       }
 
-      @for (msg of messages; track $index) {
+
+      @for (
+        msg of messages;
+        track $index
+      ) {
+
         <div
           class="message-row"
-          [class.user-message]="msg.role === 'user'"
-          [class.ai-message]="msg.role === 'assistant'"
+
+          [class.user-message]="
+            msg.role === 'user'
+          "
+
+          [class.ai-message]="
+            msg.role === 'assistant'
+          "
         >
+
           <div class="avatar">
-            @if (msg.role === 'user') {
+
+            @if (
+              msg.role === 'user'
+            ) {
+
               You
-            } @else {
-              AI
+
             }
+
+            @else {
+
+              AI
+
+            }
+
           </div>
 
+
           <div class="message-content">
+
             {{ msg.content }}
+
           </div>
+
         </div>
+
       }
 
-      <!-- Show Thinking indicator ONLY when loading and last message is from user -->
-      @if (isLoading && messages.length > 0 && messages[messages.length - 1]?.role === 'user') {
-        <div class="message-row ai-message">
-          <div class="avatar">AI</div>
-          <div class="message-content">
-            <span class="thinking">Thinking...</span>
+
+      <!-- Thinking -->
+
+      @if (
+        isLoading &&
+        messages.length > 0 &&
+        messages[
+          messages.length - 1
+        ]?.role === 'user'
+      ) {
+
+        <div
+          class="message-row ai-message"
+        >
+
+          <div class="avatar">
+
+            AI
+
           </div>
+
+
+          <div class="message-content">
+
+            <span
+              class="thinking"
+            >
+
+              Thinking...
+
+            </span>
+
+          </div>
+
         </div>
+
       }
+
     </div>
 
-    <!-- Composer -->
-    <div class="composer-container">
 
-      <!-- Selected file -->
+    <!-- ========================================= -->
+    <!-- COMPOSER -->
+    <!-- ========================================= -->
+
+    <div
+      class="composer-container"
+    >
+
+
       @if (selectedFile) {
-        <div class="selected-file">
+
+        <div
+          class="selected-file"
+        >
+
           <span>
-            📎 {{ selectedFile.name }}
+
+            📎
+            {{ selectedFile.name }}
+
           </span>
+
+
           <button
             nz-button
             nzType="text"
             (click)="removeFile()"
           >
+
             ×
+
           </button>
+
         </div>
+
       }
+
 
       <div class="composer">
 
+
         <!-- Attachment -->
+
         <label
           class="attachment-button"
           title="Attach file"
         >
+
           📎
+
+
           <input
             type="file"
             hidden
             (change)="selectFile($event)"
             accept="image/*,.pdf,.txt,.doc,.docx"
           />
+
         </label>
 
-        <!-- Text - FIXED: Use keyup.enter instead of keydown.enter -->
+
+        <!-- Message -->
+
         <textarea
           nz-input
           [(ngModel)]="message"
@@ -137,21 +463,32 @@
           (keyup.enter)="sendMessage()"
         ></textarea>
 
+
         <!-- Send -->
+
         <button
           nz-button
           nzType="primary"
+
           [disabled]="
             isLoading ||
-            (!message.trim() && !selectedFile)
+            (
+              !message.trim() &&
+              !selectedFile
+            )
           "
+
           (click)="sendMessage()"
         >
+
           Send
+
         </button>
 
       </div>
+
     </div>
 
   </main>
+
 </div>
