@@ -111,4 +111,38 @@ export class Auth {
     );
 
 }
+
+logout(): Observable<any> {
+
+  return this.http.post(
+
+    `${environment.apiUrl}/auth/logout`,
+
+    {},
+
+    {
+      withCredentials: true
+    }
+
+  );
+
+}
+
+clearAuthData(): void {
+
+  localStorage.removeItem(
+    'accessToken'
+  );
+
+  localStorage.removeItem(
+    'refreshToken'
+  );
+
+  localStorage.removeItem(
+    'user'
+  );
+
+}
+
+
 }

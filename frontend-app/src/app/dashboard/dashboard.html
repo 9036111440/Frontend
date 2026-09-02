@@ -1,157 +1,915 @@
 <div class="chat-container">
 
-  <!-- Sidebar -->
+  <!-- =====================================================
+       SIDEBAR
+       ===================================================== -->
+
   <aside class="sidebar">
-    <div class="sidebar-header">
-      <h2>AI Chat</h2>
+
+    <!-- BRAND -->
+
+    <div class="sidebar-top">
+
+      <div class="brand">
+
+        <div class="brand-logo">
+          ✦
+        </div>
+
+        <div class="brand-name">
+          AI Chat
+        </div>
+
+      </div>
+
+
+      <!-- NEW CHAT -->
+
       <button
-        nz-button
-        nzType="primary"
-        nzBlock
+        class="new-chat-button"
         (click)="newChat()"
       >
-        + New Chat
+
+        <span class="new-chat-icon">
+          +
+        </span>
+
+        <span>
+          New chat
+        </span>
+
       </button>
+
     </div>
 
-    <div class="recent-title">
-      Recent Chats
-    </div>
 
-    <div class="conversation-list">
-      @for (conversation of conversations; track conversation.id) {
-        <button
-          class="conversation-item"
-          (click)="openConversation(conversation)"
-        >
-          <span class="conversation-title">
-            {{ conversation.title }}
-          </span>
-        </button>
-      }
+    <!-- =================================================
+         RECENT CHATS
+         ================================================= -->
 
-      @if (conversations.length === 0) {
-        <div class="empty-history">
-          No conversations yet.
-        </div>
-      }
-    </div>
-  </aside>
+    <div class="recent-section">
 
-  <!-- Main Chat -->
-  <main class="chat-main">
+      <div class="recent-header">
 
-    <!-- Header -->
-    <header class="chat-header">
-      <h2>AI Assistant</h2>
-       <button
-    nz-button
-    nzType="primary"
-    routerLink="/pricing"
-  >
-    ⭐ Upgrade Pro
-  </button>
-    </header>
+        <span>
+          Recent
+        </span>
 
-    <!-- Messages -->
-    <div class="messages-container">
-      @if (messages.length === 0) {
-        <div class="welcome">
-          <h1>How can I help you?</h1>
-          <p>Ask me anything.</p>
-        </div>
-      }
+        <span class="recent-count">
+          {{ conversations.length }}
+        </span>
 
-      @for (msg of messages; track $index) {
-        <div
-          class="message-row"
-          [class.user-message]="msg.role === 'user'"
-          [class.ai-message]="msg.role === 'assistant'"
-        >
-          <div class="avatar">
-            @if (msg.role === 'user') {
-              You
-            } @else {
-              AI
-            }
-          </div>
+      </div>
 
-          <div class="message-content">
-            {{ msg.content }}
-          </div>
-        </div>
-      }
 
-      <!-- Show Thinking indicator ONLY when loading and last message is from user -->
-      @if (isLoading && messages.length > 0 && messages[messages.length - 1]?.role === 'user') {
-        <div class="message-row ai-message">
-          <div class="avatar">AI</div>
-          <div class="message-content">
-            <span class="thinking">Thinking...</span>
-          </div>
-        </div>
-      }
-    </div>
+      <div class="conversation-list">
 
-    <!-- Composer -->
-    <div class="composer-container">
+        @for (
+          conversation of conversations;
+          track conversation.id
+        ) {
 
-      <!-- Selected file -->
-      @if (selectedFile) {
-        <div class="selected-file">
-          <span>
-            📎 {{ selectedFile.name }}
-          </span>
           <button
-            nz-button
-            nzType="text"
-            (click)="removeFile()"
+            class="conversation-item"
+
+            [class.active]="
+              conversation.id === conversationId
+            "
+
+            (click)="
+              openConversation(conversation)
+            "
           >
-            ×
+
+            <div class="conversation-icon">
+
+              <span
+                nz-icon
+                nzType="message"
+              ></span>
+
+            </div>
+
+
+            <div class="conversation-details">
+
+              <span class="conversation-title">
+
+                {{ conversation.title }}
+
+              </span>
+
+
+              <span class="conversation-meta">
+
+                {{ conversation.messageCount }}
+                {{ conversation.messageCount === 1 ? 'message' : 'messages' }}
+
+              </span>
+
+            </div>
+
+
+            @if (
+              conversation.id === conversationId
+            ) {
+
+              <span
+                class="active-indicator"
+              ></span>
+
+            }
+
           </button>
-        </div>
-      }
 
-      <div class="composer">
+        }
 
-        <!-- Attachment -->
-        <label
-          class="attachment-button"
-          title="Attach file"
-        >
-          📎
-          <input
-            type="file"
-            hidden
-            (change)="selectFile($event)"
-            accept="image/*,.pdf,.txt,.doc,.docx"
-          />
-        </label>
 
-        <!-- Text - FIXED: Use keyup.enter instead of keydown.enter -->
-        <textarea
-          nz-input
-          [(ngModel)]="message"
-          placeholder="Message AI..."
-          rows="1"
-          (keyup.enter)="sendMessage()"
-        ></textarea>
+        @if (
+          conversations.length === 0
+        ) {
 
-        <!-- Send -->
+          <div class="empty-history">
+
+            <div class="empty-icon">
+              <span
+                nz-icon
+                nzType="message"
+              ></span>
+            </div>
+
+            <strong>
+              No conversations yet
+            </strong>
+
+            <span>
+              Start a new chat to see it here.
+            </span>
+
+          </div>
+
+        }
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================
+         SIDEBAR FOOTER / USER
+         ================================================= -->
+
+    @if (user) {
+
+      <div class="user-profile-wrapper">
+
+        <!-- =============================================
+             USER MENU POPUP
+             ============================================= -->
+
+        @if (showUserMenu) {
+
+          <div class="user-menu">
+
+            <!-- USER HEADER -->
+
+            <div class="user-menu-header">
+
+              <div class="profile-avatar large">
+
+                {{ userInitials }}
+
+              </div>
+
+
+              <div class="user-menu-user">
+
+                <strong>
+                  {{ fullName }}
+                </strong>
+
+                <span>
+                  {{ user.email }}
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <!-- PLAN -->
+
+            <div class="plan-section">
+
+              <div class="plan-row">
+
+                <span class="plan-title">
+                  Subscription
+                </span>
+
+
+                @if (isPro) {
+
+                  <span class="plan-badge pro">
+
+                    <span class="plan-dot"></span>
+
+                    PRO
+
+                  </span>
+
+                }
+
+                @else {
+
+                  <span class="plan-badge demo">
+
+                    <span class="plan-dot"></span>
+
+                    DEMO
+
+                  </span>
+
+                }
+
+              </div>
+
+
+              @if (!isPro) {
+
+                <button
+                  class="upgrade-button"
+                  (click)="upgradeToPro()"
+                >
+
+                  <span
+                    nz-icon
+                    nzType="crown"
+                  ></span>
+
+                  <span>
+                    Upgrade to Pro
+                  </span>
+
+                  <span class="upgrade-arrow">
+                    →
+                  </span>
+
+                </button>
+
+              }
+
+            </div>
+
+
+            <!-- ADMIN -->
+
+            @if (isAdmin) {
+
+              <button
+                class="menu-action admin-action"
+                (click)="openAdminPanel()"
+              >
+
+                <span
+                  nz-icon
+                  nzType="dashboard"
+                ></span>
+
+                <span>
+                  Admin Panel
+                </span>
+
+                <span class="action-arrow">
+                  →
+                </span>
+
+              </button>
+
+            }
+
+
+            <!-- LOGOUT -->
+
+            <button
+              class="menu-action logout-action"
+              (click)="logout()"
+            >
+
+              <span
+                nz-icon
+                nzType="logout"
+              ></span>
+
+              <span>
+                Logout
+              </span>
+
+            </button>
+
+          </div>
+
+        }
+
+
+        <!-- =============================================
+             USER BUTTON
+             ============================================= -->
+
         <button
-          nz-button
-          nzType="primary"
-          [disabled]="
-            isLoading ||
-            (!message.trim() && !selectedFile)
-          "
-          (click)="sendMessage()"
+          class="user-profile"
+          (click)="toggleUserMenu()"
         >
-          Send
+
+          <div class="profile-avatar">
+
+            {{ userInitials }}
+
+          </div>
+
+
+          <div class="profile-info">
+
+            <strong>
+              {{ fullName }}
+            </strong>
+
+
+            <span>
+
+              @if (isPro) {
+
+                <span class="sidebar-pro-dot"></span>
+
+                Pro plan
+
+              }
+
+              @else {
+
+                <span class="sidebar-demo-dot"></span>
+
+                Demo plan
+
+              }
+
+            </span>
+
+          </div>
+
+
+          <span
+            nz-icon
+
+            [nzType]="
+              showUserMenu
+                ? 'up'
+                : 'down'
+            "
+
+            class="profile-arrow"
+          ></span>
+
         </button>
 
       </div>
+
+    }
+
+  </aside>
+
+
+  <!-- =====================================================
+       MAIN CONTENT
+       ===================================================== -->
+
+  <main class="chat-main">
+
+
+    <!-- ===================================================
+         TOP HEADER
+         =================================================== -->
+
+    <header class="chat-header">
+
+      <div class="header-left">
+
+        <div class="ai-status">
+
+          <span class="status-dot"></span>
+
+          <span>
+            AI Assistant
+          </span>
+
+        </div>
+
+
+        <span class="header-divider">
+          /
+        </span>
+
+
+        <span class="header-chat-title">
+
+          @if (conversationId) {
+
+            Chat
+
+          }
+          @else {
+
+            New conversation
+
+          }
+
+        </span>
+
+      </div>
+
+
+      <div class="header-right">
+
+        @if (isPro) {
+
+          <div class="header-plan pro">
+
+            <span
+              nz-icon
+              nzType="crown"
+            ></span>
+
+            Pro
+
+          </div>
+
+        }
+
+        @else {
+
+          <div class="header-plan demo">
+
+            Demo
+
+          </div>
+
+        }
+
+      </div>
+
+    </header>
+
+
+    <!-- ===================================================
+         CHAT BODY
+         =================================================== -->
+
+    <section class="messages-container">
+
+
+      <!-- ================================================
+           EMPTY / WELCOME SCREEN
+           ================================================ -->
+
+      @if (
+        messages.length === 0
+      ) {
+
+        <div class="welcome">
+
+          <div class="welcome-glow"></div>
+
+
+          <div class="welcome-icon">
+
+            <div class="welcome-icon-inner">
+              ✦
+            </div>
+
+          </div>
+
+
+          <h1>
+
+            How can I help you?
+
+          </h1>
+
+
+          <p>
+
+            Ask a question, upload a PDF,
+            or attach an image to get started.
+
+          </p>
+
+
+          <!-- SUGGESTIONS -->
+
+          <div class="suggestions">
+
+            <button
+              class="suggestion-card"
+              (click)="message = 'Explain this topic to me simply.'"
+            >
+
+              <span class="suggestion-icon blue">
+
+                <span
+                  nz-icon
+                  nzType="bulb"
+                ></span>
+
+              </span>
+
+              <span class="suggestion-text">
+
+                Explain something
+
+              </span>
+
+              <span class="suggestion-arrow">
+                →
+              </span>
+
+            </button>
+
+
+            <button
+              class="suggestion-card"
+              (click)="message = 'Summarize this document.'"
+            >
+
+              <span class="suggestion-icon purple">
+
+                <span
+                  nz-icon
+                  nzType="file-text"
+                ></span>
+
+              </span>
+
+              <span class="suggestion-text">
+
+                Summarize a document
+
+              </span>
+
+              <span class="suggestion-arrow">
+                →
+              </span>
+
+            </button>
+
+
+            <button
+              class="suggestion-card"
+              (click)="message = 'Analyze this image for me.'"
+            >
+
+              <span class="suggestion-icon orange">
+
+                <span
+                  nz-icon
+                  nzType="picture"
+                ></span>
+
+              </span>
+
+              <span class="suggestion-text">
+
+                Analyze an image
+
+              </span>
+
+              <span class="suggestion-arrow">
+                →
+              </span>
+
+            </button>
+
+          </div>
+
+        </div>
+
+      }
+
+
+      <!-- ================================================
+           CHAT MESSAGES
+           ================================================ -->
+
+      @for (
+        msg of messages;
+        track $index
+      ) {
+
+        <div
+          class="message-wrapper"
+
+          [class.user-wrapper]="
+            msg.role === 'user'
+          "
+
+          [class.ai-wrapper]="
+            msg.role === 'assistant'
+          "
+        >
+
+          <div class="message-row">
+
+
+            <!-- AVATAR -->
+
+            <div
+              class="message-avatar"
+
+              [class.user-avatar]="
+                msg.role === 'user'
+              "
+
+              [class.ai-avatar]="
+                msg.role === 'assistant'
+              "
+            >
+
+              @if (
+                msg.role === 'user'
+              ) {
+
+                {{ userInitials }}
+
+              }
+
+              @else {
+
+                ✦
+
+              }
+
+            </div>
+
+
+            <!-- MESSAGE -->
+
+            <div class="message-body">
+
+
+              <div class="message-author">
+
+                @if (
+                  msg.role === 'user'
+                ) {
+
+                  You
+
+                }
+
+                @else {
+
+                  AI Assistant
+
+                }
+
+              </div>
+
+
+              <div
+                class="message-content"
+
+                [class.user-content]="
+                  msg.role === 'user'
+                "
+
+                [class.ai-content]="
+                  msg.role === 'assistant'
+                "
+              >
+
+                {{ msg.content }}
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      }
+
+
+      <!-- ================================================
+           THINKING
+           ================================================ -->
+
+      @if (
+        isLoading &&
+        messages.length > 0 &&
+        messages[
+          messages.length - 1
+        ]?.role === 'user'
+      ) {
+
+        <div class="message-wrapper ai-wrapper">
+
+          <div class="message-row">
+
+            <div
+              class="message-avatar ai-avatar"
+            >
+
+              ✦
+
+            </div>
+
+
+            <div class="message-body">
+
+              <div class="message-author">
+
+                AI Assistant
+
+              </div>
+
+
+              <div class="thinking-container">
+
+                <span class="thinking-dot"></span>
+
+                <span class="thinking-dot"></span>
+
+                <span class="thinking-dot"></span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      }
+
+    </section>
+
+
+    <!-- ===================================================
+         COMPOSER
+         =================================================== -->
+
+    <div class="composer-area">
+
+
+      <!-- SELECTED FILE -->
+
+      @if (selectedFile) {
+
+        <div class="selected-file">
+
+          <div class="file-info">
+
+            <div class="file-icon">
+
+              @if (
+                selectedFile.type === 'application/pdf'
+              ) {
+
+                <span
+                  nz-icon
+                  nzType="file-pdf"
+                ></span>
+
+              }
+
+              @else {
+
+                <span
+                  nz-icon
+                  nzType="paper-clip"
+                ></span>
+
+              }
+
+            </div>
+
+
+            <div class="file-details">
+
+              <strong>
+                {{ selectedFile.name }}
+              </strong>
+
+              <span>
+                Ready to send
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <button
+            class="remove-file"
+            (click)="removeFile()"
+            type="button"
+          >
+
+            <span
+              nz-icon
+              nzType="close"
+            ></span>
+
+          </button>
+
+        </div>
+
+      }
+
+
+      <!-- COMPOSER -->
+
+      <div class="composer-wrapper">
+
+        <div class="composer">
+
+
+          <!-- ATTACHMENT -->
+
+          <label
+            class="composer-action"
+            title="Attach file"
+          >
+
+            <span
+              nz-icon
+              nzType="paper-clip"
+            ></span>
+
+
+            <input
+              type="file"
+              hidden
+              (change)="selectFile($event)"
+              accept="image/*,.pdf,.txt,.doc,.docx"
+            />
+
+          </label>
+
+
+          <!-- TEXT -->
+
+          <textarea
+            nz-input
+            [(ngModel)]="message"
+            placeholder="Message AI..."
+            rows="1"
+            (keyup.enter)="sendMessage()"
+          ></textarea>
+
+
+          <!-- SEND -->
+
+          <button
+            class="send-button"
+
+            [class.active]="
+              message.trim() ||
+              selectedFile
+            "
+
+            [disabled]="
+              isLoading ||
+              (
+                !message.trim() &&
+                !selectedFile
+              )
+            "
+
+            (click)="sendMessage()"
+          >
+
+            <span
+              nz-icon
+              nzType="arrow-up"
+            ></span>
+
+          </button>
+
+        </div>
+
+
+        <div class="composer-hint">
+
+          AI can make mistakes.
+          Check important information.
+
+        </div>
+
+      </div>
+
     </div>
 
   </main>
+
 </div>
