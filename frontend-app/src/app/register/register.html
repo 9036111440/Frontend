@@ -1,377 +1,759 @@
-<div class="register-container">
+<div class="register-page">
 
-  <div class="register-card">
+  <!-- =====================================================
+       LEFT BRAND PANEL
+       ===================================================== -->
 
-    <h1>Create Account</h1>
+  <section class="brand-panel">
 
-    <p class="subtitle">
-      Create your AI Chatbot account
-    </p>
+    <div class="brand-content">
+
+      <div class="brand-logo">
+        ✦
+      </div>
+
+      <h1>
+        AI Chat
+      </h1>
+
+      <p class="brand-title">
+        Your intelligent workspace
+      </p>
+
+      <p class="brand-description">
+        Chat with AI, analyze PDFs and images,
+        and keep all your conversations in one place.
+      </p>
 
 
-    <form
-      nz-form
-      [formGroup]="registerForm"
-      (ngSubmit)="submit()"
-      nzLayout="vertical"
-    >
+      <div class="feature-list">
 
-      <!-- First Name -->
+        <div class="feature-item">
 
-      <nz-form-item>
+          <div class="feature-icon">
+            <span>✦</span>
+          </div>
 
-        <nz-form-label nzRequired>
-          First Name
-        </nz-form-label>
+          <div>
+            <strong>
+              Powerful AI conversations
+            </strong>
 
-        <nz-form-control>
-
-          <input
-            nz-input
-            formControlName="firstName"
-            placeholder="Enter first name"
-          />
-
-          @if (
-            registerForm.get('firstName')?.touched &&
-            registerForm.get('firstName')?.hasError('required')
-          ) {
-
-            <span class="error">
-              First name is required
+            <span>
+              Get fast answers and useful ideas.
             </span>
-
-          }
-
-          @if (
-            registerForm.get('firstName')?.touched &&
-            registerForm.get('firstName')?.hasError('minlength')
-          ) {
-
-            <span class="error">
-              First name must contain at least 2 characters
-            </span>
-
-          }
-
-        </nz-form-control>
-
-      </nz-form-item>
-
-
-      <!-- Last Name -->
-
-      <nz-form-item>
-
-        <nz-form-label nzRequired>
-          Last Name
-        </nz-form-label>
-
-        <nz-form-control>
-
-          <input
-            nz-input
-            formControlName="lastName"
-            placeholder="Enter last name"
-          />
-
-          @if (
-            registerForm.get('lastName')?.touched &&
-            registerForm.get('lastName')?.hasError('required')
-          ) {
-
-            <span class="error">
-              Last name is required
-            </span>
-
-          }
-
-          @if (
-            registerForm.get('lastName')?.touched &&
-            registerForm.get('lastName')?.hasError('minlength')
-          ) {
-
-            <span class="error">
-              Last name must contain at least 2 characters
-            </span>
-
-          }
-
-        </nz-form-control>
-
-      </nz-form-item>
-
-
-      <!-- Email -->
-
-<!-- Email -->
-
-<nz-form-item>
-
-    <nz-form-label nzRequired>
-        Email
-    </nz-form-label>
-
-    <nz-form-control>
-
-        <div class="email-row">
-
-            <input
-                nz-input
-                type="email"
-                formControlName="email"
-                placeholder="Enter email"
-            />
-
-            <button
-                nz-button
-                nzType="default"
-                type="button"
-                [nzLoading]="isSendingOtp"
-                [disabled]="
-                    registerForm.get('email')?.invalid ||
-                    emailVerified
-                "
-                (click)="sendOtp()"
-            >
-                {{ emailOtpSent ? 'Resend OTP' : 'Send OTP' }}
-            </button>
+          </div>
 
         </div>
 
 
-        @if (
-            registerForm.get('email')?.touched &&
-            registerForm.get('email')?.hasError('required')
-        ) {
+        <div class="feature-item">
 
-            <span class="error">
-                Email is required
+          <div class="feature-icon">
+            <span>⌁</span>
+          </div>
+
+          <div>
+            <strong>
+              PDF & image analysis
+            </strong>
+
+            <span>
+              Ask questions about your documents.
             </span>
+          </div>
 
-        }
+        </div>
 
 
-        @if (
-            registerForm.get('email')?.touched &&
-            registerForm.get('email')?.hasError('email')
-        ) {
+        <div class="feature-item">
 
-            <span class="error">
-                Please enter a valid email
+          <div class="feature-icon">
+            <span>✓</span>
+          </div>
+
+          <div>
+            <strong>
+              Secure account
+            </strong>
+
+            <span>
+              Email verification keeps your account protected.
             </span>
+          </div>
 
-        }
+        </div>
+
+      </div>
+
+    </div>
 
 
-        @if (emailVerified) {
+    <div class="brand-footer">
 
-            <span class="success">
-                ✓ Email verified successfully
-            </span>
+      AI Chatbot · Powered by Groq
 
-        }
+    </div>
 
-    </nz-form-control>
+  </section>
 
-</nz-form-item>
 
-@if (emailOtpSent && !emailVerified) {
+  <!-- =====================================================
+       REGISTER PANEL
+       ===================================================== -->
 
-    <nz-form-item>
+  <section class="register-panel">
 
-        <nz-form-label nzRequired>
-            OTP
-        </nz-form-label>
+    <div class="register-card">
 
-        <nz-form-control>
 
-            <div class="otp-row">
+      <!-- HEADER -->
+
+      <div class="register-header">
+
+        <div class="mobile-brand-logo">
+          ✦
+        </div>
+
+        <span class="eyebrow">
+          GET STARTED
+        </span>
+
+        <h2>
+          Create your account
+        </h2>
+
+        <p>
+          Join AI Chat and start exploring.
+        </p>
+
+      </div>
+
+
+      <!-- =================================================
+           FORM
+           ================================================= -->
+
+      <form
+        nz-form
+        [formGroup]="registerForm"
+        (ngSubmit)="submit()"
+        nzLayout="vertical"
+      >
+
+
+        <!-- ===============================================
+             NAME ROW
+             =============================================== -->
+
+        <div class="form-row">
+
+
+          <!-- FIRST NAME -->
+
+          <nz-form-item>
+
+            <nz-form-label nzRequired>
+              First name
+            </nz-form-label>
+
+            <nz-form-control>
+
+              <div
+                class="input-wrapper"
+                [class.invalid]="
+                  registerForm.get('firstName')?.touched &&
+                  registerForm.get('firstName')?.invalid
+                "
+              >
+
+                <span class="field-icon">
+                  <span nz-icon nzType="user"></span>
+                </span>
 
                 <input
-                    nz-input
-                    formControlName="otp"
-                    maxlength="6"
-                    inputmode="numeric"
-                    placeholder="Enter 6-digit OTP"
+                  nz-input
+                  formControlName="firstName"
+                  placeholder="Praveen"
                 />
 
-                <button
-                    nz-button
-                    nzType="primary"
-                    type="button"
-                    [nzLoading]="isVerifyingOtp"
-                    [disabled]="
-                        registerForm.get('otp')?.invalid
-                    "
-                    (click)="verifyOtp()"
-                >
-                    Verify
-                </button>
+              </div>
+
+
+              @if (
+                registerForm.get('firstName')?.touched &&
+                registerForm.get('firstName')?.hasError('required')
+              ) {
+
+                <span class="error">
+                  First name is required
+                </span>
+
+              }
+
+
+              @if (
+                registerForm.get('firstName')?.touched &&
+                registerForm.get('firstName')?.hasError('minlength')
+              ) {
+
+                <span class="error">
+                  Minimum 2 characters
+                </span>
+
+              }
+
+            </nz-form-control>
+
+          </nz-form-item>
+
+
+          <!-- LAST NAME -->
+
+          <nz-form-item>
+
+            <nz-form-label nzRequired>
+              Last name
+            </nz-form-label>
+
+            <nz-form-control>
+
+              <div
+                class="input-wrapper"
+                [class.invalid]="
+                  registerForm.get('lastName')?.touched &&
+                  registerForm.get('lastName')?.invalid
+                "
+              >
+
+                <span class="field-icon">
+                  <span nz-icon nzType="user"></span>
+                </span>
+
+                <input
+                  nz-input
+                  formControlName="lastName"
+                  placeholder="Kumar"
+                />
+
+              </div>
+
+
+              @if (
+                registerForm.get('lastName')?.touched &&
+                registerForm.get('lastName')?.hasError('required')
+              ) {
+
+                <span class="error">
+                  Last name is required
+                </span>
+
+              }
+
+
+              @if (
+                registerForm.get('lastName')?.touched &&
+                registerForm.get('lastName')?.hasError('minlength')
+              ) {
+
+                <span class="error">
+                  Minimum 2 characters
+                </span>
+
+              }
+
+            </nz-form-control>
+
+          </nz-form-item>
+
+        </div>
+
+
+        <!-- ===============================================
+             EMAIL
+             =============================================== -->
+
+        <nz-form-item>
+
+          <nz-form-label nzRequired>
+            Email address
+          </nz-form-label>
+
+          <nz-form-control>
+
+            <div
+              class="email-row"
+              [class.verified]="emailVerified"
+            >
+
+              <div class="input-wrapper email-input">
+
+                <span class="field-icon">
+                  <span
+                    nz-icon
+                    nzType="mail"
+                  ></span>
+                </span>
+
+                <input
+                  nz-input
+                  type="email"
+                  formControlName="email"
+                  placeholder="you@example.com"
+                />
+
+              </div>
+
+
+              <button
+                nz-button
+                type="button"
+                class="otp-send-button"
+
+                [nzLoading]="isSendingOtp"
+
+                [disabled]="
+                  registerForm.get('email')?.invalid ||
+                  emailVerified
+                "
+
+                (click)="sendOtp()"
+              >
+
+                @if (emailOtpSent) {
+
+                  <span>
+                    Resend OTP
+                  </span>
+
+                }
+
+                @else {
+
+                  <span>
+                    Send OTP
+                  </span>
+
+                }
+
+              </button>
 
             </div>
 
 
             @if (
-                registerForm.get('otp')?.touched &&
-                registerForm.get('otp')?.hasError('required')
+              registerForm.get('email')?.touched &&
+              registerForm.get('email')?.hasError('required')
             ) {
 
-                <span class="error">
-                    OTP is required
-                </span>
+              <span class="error">
+                Email is required
+              </span>
 
             }
 
 
             @if (
-                registerForm.get('otp')?.touched &&
-                registerForm.get('otp')?.hasError('pattern')
+              registerForm.get('email')?.touched &&
+              registerForm.get('email')?.hasError('email')
             ) {
 
-                <span class="error">
-                    OTP must be exactly 6 digits
-                </span>
+              <span class="error">
+                Please enter a valid email address
+              </span>
 
             }
 
-        </nz-form-control>
 
-    </nz-form-item>
+            @if (emailVerified) {
 
-}
+              <div class="verified-message">
 
+                <span class="verified-icon">
+                  ✓
+                </span>
 
-      <!-- Password -->
+                Email verified successfully
 
-      <nz-form-item>
+              </div>
 
-        <nz-form-label nzRequired>
-          New Password
-        </nz-form-label>
+            }
 
-        <nz-form-control>
+          </nz-form-control>
 
-          <input
-            nz-input
-            type="password"
-            formControlName="password"
-            placeholder="Enter password"
-          />
-
-          @if (
-            registerForm.get('password')?.touched &&
-            registerForm.get('password')?.hasError('required')
-          ) {
-
-            <span class="error">
-              Password is required
-            </span>
-
-          }
-
-          @if (
-            registerForm.get('password')?.touched &&
-            registerForm.get('password')?.hasError('minlength')
-          ) {
-
-            <span class="error">
-              Password must contain more than 8 characters
-            </span>
-
-          }
-
-          @if (
-            registerForm.get('password')?.touched &&
-            registerForm.get('password')?.hasError('pattern')
-          ) {
-
-            <span class="error">
-              Must contain uppercase, lowercase, number and special character
-            </span>
-
-          }
-
-        </nz-form-control>
-
-      </nz-form-item>
+        </nz-form-item>
 
 
-      <!-- Confirm Password -->
+        <!-- ===============================================
+             OTP
+             =============================================== -->
 
-      <nz-form-item>
+        @if (
+          emailOtpSent &&
+          !emailVerified
+        ) {
 
-        <nz-form-label nzRequired>
-          Confirm Password
-        </nz-form-label>
+          <div class="verification-box">
 
-        <nz-form-control>
+            <div class="verification-header">
 
-          <input
-            nz-input
-            type="password"
-            formControlName="confirmPassword"
-            placeholder="Confirm password"
-          />
+              <div class="verification-icon">
+                <span nz-icon nzType="safety-certificate"></span>
+              </div>
 
-          @if (
-            registerForm.get('confirmPassword')?.touched &&
-            registerForm.get('confirmPassword')?.hasError('required')
-          ) {
+              <div>
 
-            <span class="error">
-              Confirm password is required
-            </span>
+                <strong>
+                  Verify your email
+                </strong>
 
-          }
+                <span>
+                  Enter the 6-digit code sent to your email.
+                </span>
 
-          @if (
-            registerForm.get('confirmPassword')?.touched &&
-            registerForm.hasError('passwordMismatch')
-          ) {
+              </div>
 
-            <span class="error">
-              Passwords do not match
-            </span>
-
-          }
-
-        </nz-form-control>
-
-      </nz-form-item>
+            </div>
 
 
-      <!-- Submit -->
+            <nz-form-item>
 
-      <nz-form-item>
+              <nz-form-label nzRequired>
+                Verification code
+              </nz-form-label>
 
-        <nz-form-control>
+              <nz-form-control>
 
-          <button
-            nz-button
-            nzType="primary"
-            nzSize="large"
-            nzBlock
-            type="submit"
-            [nzLoading]="isLoading"
-            [disabled]="isLoading ||
-        !emailVerified"
-          >
+                <div class="otp-row">
+
+                  <div class="input-wrapper">
+
+                    <span class="field-icon">
+                      <span
+                        nz-icon
+                        nzType="lock"
+                      ></span>
+                    </span>
+
+                    <input
+                      nz-input
+                      formControlName="otp"
+                      maxlength="6"
+                      inputmode="numeric"
+                      placeholder="000000"
+                    />
+
+                  </div>
+
+
+                  <button
+                    nz-button
+                    nzType="primary"
+                    type="button"
+                    class="verify-button"
+
+                    [nzLoading]="isVerifyingOtp"
+
+                    [disabled]="
+                      registerForm.get('otp')?.invalid
+                    "
+
+                    (click)="verifyOtp()"
+                  >
+
+                    Verify
+
+                  </button>
+
+                </div>
+
+
+                @if (
+                  registerForm.get('otp')?.touched &&
+                  registerForm.get('otp')?.hasError('required')
+                ) {
+
+                  <span class="error">
+                    OTP is required
+                  </span>
+
+                }
+
+
+                @if (
+                  registerForm.get('otp')?.touched &&
+                  registerForm.get('otp')?.hasError('pattern')
+                ) {
+
+                  <span class="error">
+                    OTP must be exactly 6 digits
+                  </span>
+
+                }
+
+              </nz-form-control>
+
+            </nz-form-item>
+
+          </div>
+
+        }
+
+
+        <!-- ===============================================
+             PASSWORD
+             =============================================== -->
+
+        <nz-form-item>
+
+          <nz-form-label nzRequired>
+            Password
+          </nz-form-label>
+
+          <nz-form-control>
+
+            <div
+              class="input-wrapper"
+              [class.invalid]="
+                registerForm.get('password')?.touched &&
+                registerForm.get('password')?.invalid
+              "
+            >
+
+              <span class="field-icon">
+                <span
+                  nz-icon
+                  nzType="lock"
+                ></span>
+              </span>
+
+              <input
+                nz-input
+                type="password"
+                formControlName="password"
+                placeholder="Create a strong password"
+              />
+
+            </div>
+
+
+            @if (
+              registerForm.get('password')?.touched &&
+              registerForm.get('password')?.hasError('required')
+            ) {
+
+              <span class="error">
+                Password is required
+              </span>
+
+            }
+
+
+            @if (
+              registerForm.get('password')?.touched &&
+              registerForm.get('password')?.hasError('minlength')
+            ) {
+
+              <span class="error">
+                Password must contain at least 9 characters
+              </span>
+
+            }
+
+
+            @if (
+              registerForm.get('password')?.touched &&
+              registerForm.get('password')?.hasError('pattern')
+            ) {
+
+              <span class="error">
+                Use uppercase, lowercase, number and special character
+              </span>
+
+            }
+
+
+            <div class="password-hints">
+
+              <span>
+                9+ characters
+              </span>
+
+              <span>
+                A-Z
+              </span>
+
+              <span>
+                a-z
+              </span>
+
+              <span>
+                0-9
+              </span>
+
+              <span>
+                !@#
+              </span>
+
+            </div>
+
+          </nz-form-control>
+
+        </nz-form-item>
+
+
+        <!-- ===============================================
+             CONFIRM PASSWORD
+             =============================================== -->
+
+        <nz-form-item>
+
+          <nz-form-label nzRequired>
+            Confirm password
+          </nz-form-label>
+
+          <nz-form-control>
+
+            <div
+              class="input-wrapper"
+              [class.invalid]="
+                registerForm.get('confirmPassword')?.touched &&
+                (
+                  registerForm.get('confirmPassword')?.invalid ||
+                  registerForm.hasError('passwordMismatch')
+                )
+              "
+            >
+
+              <span class="field-icon">
+                <span
+                  nz-icon
+                  nzType="lock"
+                ></span>
+              </span>
+
+              <input
+                nz-input
+                type="password"
+                formControlName="confirmPassword"
+                placeholder="Enter your password again"
+              />
+
+            </div>
+
+
+            @if (
+              registerForm.get('confirmPassword')?.touched &&
+              registerForm.get('confirmPassword')?.hasError('required')
+            ) {
+
+              <span class="error">
+                Confirm password is required
+              </span>
+
+            }
+
+
+            @if (
+              registerForm.get('confirmPassword')?.touched &&
+              registerForm.hasError('passwordMismatch')
+            ) {
+
+              <span class="error">
+                Passwords do not match
+              </span>
+
+            }
+
+          </nz-form-control>
+
+        </nz-form-item>
+
+
+        <!-- ===============================================
+             SUBMIT
+             =============================================== -->
+
+        <button
+          nz-button
+          nzType="primary"
+          nzSize="large"
+          nzBlock
+          class="register-button"
+          type="submit"
+
+          [nzLoading]="isLoading"
+
+          [disabled]="
+            isLoading ||
+            !emailVerified
+          "
+        >
+
+          <span>
             Create Account
-          </button>
+          </span>
+
+          <span class="button-arrow">
+            →
+          </span>
+
+        </button>
 
 
+        <!-- EMAIL VERIFICATION INFO -->
 
-        </nz-form-control>
+        @if (!emailVerified) {
 
-      </nz-form-item>
+          <div class="verification-hint">
 
-    </form>
-    <div class="login-link">
-  Already have an account?
-  <a routerLink="/login">Login</a>
-</div>
+            <span
+              nz-icon
+              nzType="info-circle"
+            ></span>
 
-  </div>
+            Verify your email before creating your account.
+
+          </div>
+
+        }
+
+
+      </form>
+
+
+      <!-- LOGIN -->
+
+      <div class="login-link">
+
+        <span>
+          Already have an account?
+        </span>
+
+        <a
+          routerLink="/login"
+        >
+          Login
+        </a>
+
+      </div>
+
+
+      <!-- FOOTER -->
+
+      <div class="security-note">
+
+        <span
+          nz-icon
+          nzType="safety"
+        ></span>
+
+        Your information is securely protected.
+
+      </div>
+
+    </div>
+
+  </section>
 
 </div>
