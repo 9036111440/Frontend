@@ -674,22 +674,203 @@
               </div>
 
 
-              <div
-                class="message-content"
+<div
+  class="message-content"
 
-                [class.user-content]="
-                  msg.role === 'user'
-                "
+  [class.user-content]="
+    msg.role === 'user'
+  "
 
-                [class.ai-content]="
-                  msg.role === 'assistant'
-                "
-              >
+  [class.ai-content]="
+    msg.role === 'assistant'
+  "
+>
 
-                {{ msg.content }}
+  <!-- MESSAGE TEXT -->
 
-              </div>
+  {{ msg.content }}
 
+
+  <!-- =================================================
+       AI MESSAGE ACTIONS
+       Only show for assistant messages
+       ================================================= -->
+
+  @if (
+    msg.role === 'assistant'
+  ) {
+
+    <div class="ai-message-actions">
+
+
+      <!-- =============================================
+           COPY
+           ============================================= -->
+
+      <button
+        type="button"
+        class="message-action"
+        title="Copy response"
+
+        (click)="
+          copyMessage(msg.content)
+        "
+
+        [disabled]="
+          regeneratingMessageIndex !== null
+        "
+      >
+
+        <span
+          nz-icon
+          nzType="copy"
+          nzTheme="outline"
+        ></span>
+
+        <span class="action-label">
+          Copy
+        </span>
+
+      </button>
+
+
+      <!-- =============================================
+           REGENERATE
+           Only show for LAST AI response
+           ============================================= -->
+
+      @if (
+        $index === messages.length - 1
+      ) {
+
+        <button
+          type="button"
+          class="message-action"
+          title="Regenerate response"
+
+          (click)="
+            regenerateMessage($index)
+          "
+
+          [disabled]="
+            isLoading ||
+            regeneratingMessageIndex !== null
+          "
+        >
+
+          @if (
+            regeneratingMessageIndex === $index
+          ) {
+
+            <span
+              nz-icon
+              nzType="loading"
+            ></span>
+
+            <span class="action-label">
+              Regenerating...
+            </span>
+
+          }
+
+          @else {
+
+            <span
+              nz-icon
+              nzType="reload"
+              nzTheme="outline"
+            ></span>
+
+            <span class="action-label">
+              Regenerate
+            </span>
+
+          }
+
+        </button>
+
+      }
+
+
+      <!-- =============================================
+           LIKE
+           ============================================= -->
+
+      <button
+        type="button"
+        class="message-action feedback-button"
+
+        [class.active]="
+          msg.feedback === 'up'
+        "
+
+        title="Good response"
+
+        (click)="
+          giveFeedback($index, 'up')
+        "
+
+        [disabled]="
+          feedbackLoading === $index
+        "
+      >
+
+        <span
+          nz-icon
+          nzType="like"
+
+          [nzTheme]="
+            msg.feedback === 'up'
+              ? 'fill'
+              : 'outline'
+          "
+        ></span>
+
+      </button>
+
+
+      <!-- =============================================
+           DISLIKE
+           ============================================= -->
+
+      <button
+        type="button"
+        class="message-action feedback-button"
+
+        [class.active]="
+          msg.feedback === 'down'
+        "
+
+        title="Bad response"
+
+        (click)="
+          giveFeedback($index, 'down')
+        "
+
+        [disabled]="
+          feedbackLoading === $index
+        "
+      >
+
+        <span
+          nz-icon
+          nzType="dislike"
+
+          [nzTheme]="
+            msg.feedback === 'down'
+              ? 'fill'
+              : 'outline'
+          "
+        ></span>
+
+      </button>
+
+
+    </div>
+
+  }
+
+</div>
             </div>
 
           </div>

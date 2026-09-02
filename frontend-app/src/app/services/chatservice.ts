@@ -151,4 +151,57 @@ export class Chatservice {
 
   }
 
+  regenerateResponse(
+  conversationId: string
+): Observable<any> {
+
+  const token =
+    localStorage.getItem('accessToken');
+
+  const headers =
+    new HttpHeaders({
+      Authorization:
+        `Bearer ${token}`
+    });
+
+  return this.http.post(
+    `${this.apiUrl}/regenerate`,
+    {
+      conversationId
+    },
+    {
+      headers
+    }
+  );
+}
+
+
+sendFeedback(
+  conversationId: string,
+  messageId: string,
+  feedback: 'up' | 'down'
+): Observable<any> {
+
+  const token =
+    localStorage.getItem('accessToken');
+
+  const headers =
+    new HttpHeaders({
+      Authorization:
+        `Bearer ${token}`
+    });
+
+  return this.http.post(
+    `${this.apiUrl}/feedback`,
+    {
+      conversationId,
+      messageId,
+      feedback
+    },
+    {
+      headers
+    }
+  );
+}
+
 }
