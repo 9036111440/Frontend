@@ -140,6 +140,9 @@ export class Dashboard
   isLoading =
     false;
 
+    isEmailingPdf =
+  false;
+
     regeneratingMessageIndex:
   number | null = null;
 
@@ -154,6 +157,8 @@ feedbackLoading:
 
   conversations:
     Conversation[] = [];
+
+    conversationSearch = '';
 
 
   messages:
@@ -333,6 +338,80 @@ feedbackLoading:
   get isAdmin(): boolean {
 
   return this.user?.role === 'admin';
+
+}
+
+// =====================================================
+// EMAIL CONVERSATION PDF
+// =====================================================
+
+emailConversationPdf(): void {
+
+  if (!this.conversationId) {
+
+    console.warn(
+      'No conversation selected'
+    );
+
+    return;
+
+  }
+
+
+  if (this.isEmailingPdf) {
+
+    return;
+
+  }
+
+
+  this.isEmailingPdf =
+    true;
+
+
+  this.cdr.markForCheck();
+
+
+  this.chatService
+    .emailConversationPdf(
+      this.conversationId
+    )
+    .pipe(
+      finalize(() => {
+
+        this.isEmailingPdf =
+          false;
+
+        this.cdr.markForCheck();
+
+      })
+    )
+    .subscribe({
+
+      next: (
+        response
+      ) => {
+
+        console.log(
+          'Conversation PDF emailed:',
+          response
+        );
+
+      },
+
+
+      error: (
+        error
+      ) => {
+
+        console.error(
+          'Email PDF failed:',
+          error
+        );
+
+      }
+
+    });
 
 }
 
@@ -715,6 +794,29 @@ openAdminPanel(): void {
 
   }
 
+
+  // =====================================================
+// FILTER CONVERSATIONS
+// =====================================================
+
+get filteredConversations(): Conversation[] {
+
+  const search =
+    this.conversationSearch
+      .trim()
+      .toLowerCase();
+
+  if (!search) {
+    return this.conversations;
+  }
+
+  return this.conversations.filter(
+    conversation =>
+      conversation.title
+        ?.toLowerCase()
+        .includes(search)
+  );
+}
 
   /*
    * ==========================================

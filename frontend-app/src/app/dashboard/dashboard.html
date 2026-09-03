@@ -48,24 +48,62 @@
          ================================================= -->
 
     <div class="recent-section">
+<div class="recent-header">
 
-      <div class="recent-header">
+  <span>
+    Recent
+  </span>
 
-        <span>
-          Recent
-        </span>
+  <span class="recent-count">
+    {{ conversations.length }}
+  </span>
 
-        <span class="recent-count">
-          {{ conversations.length }}
-        </span>
+</div>
 
-      </div>
+
+<!-- =================================================
+     SEARCH CONVERSATIONS
+     ================================================= -->
+
+<div class="conversation-search">
+
+  <span
+    nz-icon
+    nzType="search"
+    class="conversation-search-icon"
+  ></span>
+
+  <input
+    type="text"
+    [(ngModel)]="conversationSearch"
+    placeholder="Search conversations..."
+  />
+
+  @if (conversationSearch) {
+
+    <button
+      type="button"
+      class="conversation-search-clear"
+      (click)="conversationSearch = ''"
+      title="Clear search"
+    >
+
+      <span
+        nz-icon
+        nzType="close"
+      ></span>
+
+    </button>
+
+  }
+
+</div>
 
 
       <div class="conversation-list">
 
         @for (
-          conversation of conversations;
+           conversation of filteredConversations;
           track conversation.id
         ) {
 
@@ -125,30 +163,53 @@
         }
 
 
-        @if (
-          conversations.length === 0
-        ) {
+@if (conversations.length === 0) {
 
-          <div class="empty-history">
+  <div class="empty-history">
 
-            <div class="empty-icon">
-              <span
-                nz-icon
-                nzType="message"
-              ></span>
-            </div>
+    <div class="empty-icon">
+      <span
+        nz-icon
+        nzType="message"
+      ></span>
+    </div>
 
-            <strong>
-              No conversations yet
-            </strong>
+    <strong>
+      No conversations yet
+    </strong>
 
-            <span>
-              Start a new chat to see it here.
-            </span>
+    <span>
+      Start a new chat to see it here.
+    </span>
 
-          </div>
+  </div>
 
-        }
+}
+
+@else if (
+  filteredConversations.length === 0
+) {
+
+  <div class="empty-history search-empty">
+
+    <div class="empty-icon">
+      <span
+        nz-icon
+        nzType="search"
+      ></span>
+    </div>
+
+    <strong>
+      No matches found
+    </strong>
+
+    <span>
+      Try a different conversation name.
+    </span>
+
+  </div>
+
+}
 
       </div>
 
@@ -429,22 +490,83 @@
 
 
       <div class="header-right">
-        <button
-  type="button"
-  class="export-pdf-button"
-  title="Export conversation as PDF"
-  (click)="exportConversationPdf()"
-  [disabled]="!conversationId || messages.length === 0"
->
-  <span
-    nz-icon
-    nzType="file-pdf"
-  ></span>
+<!-- PDF ACTION MENU -->
+<div class="pdf-menu-wrapper">
 
-  <span>
-    Export PDF
-  </span>
-</button>
+  <button
+    type="button"
+    class="pdf-menu-button"
+    title="Conversation options"
+    [disabled]="!conversationId || messages.length === 0"
+  >
+    <span nz-icon nzType="more"></span>
+  </button>
+
+  <div class="pdf-menu">
+
+    <!-- DOWNLOAD PDF -->
+    <button
+      type="button"
+      class="pdf-menu-item"
+      (click)="exportConversationPdf()"
+      [disabled]="!conversationId || messages.length === 0"
+    >
+
+      <span
+        nz-icon
+        nzType="download"
+      ></span>
+
+      <span>
+        Download PDF
+      </span>
+
+    </button>
+
+
+    <!-- EMAIL PDF -->
+    <button
+      type="button"
+      class="pdf-menu-item"
+      (click)="emailConversationPdf()"
+      [disabled]="
+        !conversationId ||
+        messages.length === 0 ||
+        isEmailingPdf
+      "
+    >
+
+      @if (isEmailingPdf) {
+
+        <span
+          nz-icon
+          nzType="loading"
+        ></span>
+
+        <span>
+          Sending...
+        </span>
+
+      }
+
+      @else {
+
+        <span
+          nz-icon
+          nzType="mail"
+        ></span>
+
+        <span>
+          Send PDF to Email
+        </span>
+
+      }
+
+    </button>
+
+  </div>
+
+</div>
 
         @if (isPro) {
 
