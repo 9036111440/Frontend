@@ -204,4 +204,56 @@ sendFeedback(
   );
 }
 
+exportConversationPdf(
+  conversationId: string
+): Observable<Blob> {
+
+  const token =
+    localStorage.getItem(
+      'accessToken'
+    );
+
+  const headers =
+    new HttpHeaders({
+      Authorization:
+        `Bearer ${token}`
+    });
+
+
+  return this.http.get(
+    `${this.apiUrl}/conversations/${conversationId}/pdf`,
+    {
+      headers,
+      responseType: 'blob'
+    }
+  );
+
+}
+
+emailConversationPdf(
+  conversationId: string
+): Observable<any> {
+
+  const token =
+    localStorage.getItem(
+      'accessToken'
+    );
+
+  const headers =
+    new HttpHeaders({
+      Authorization:
+        `Bearer ${token}`
+    });
+
+
+  return this.http.post(
+    `${this.apiUrl}/conversations/${conversationId}/email-pdf`,
+    {},
+    {
+      headers
+    }
+  );
+
+}
+
 }
