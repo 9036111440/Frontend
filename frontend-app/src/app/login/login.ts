@@ -1,55 +1,62 @@
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
 
 import {
-  Component
+    Component, ChangeDetectorRef
 } from '@angular/core';
 
+import { finalize } from 'rxjs';
 import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators
+    NzIconModule
+} from 'ng-zorro-antd/icon';
+
+import {
+    FormBuilder,
+    FormGroup,
+    ReactiveFormsModule,
+    Validators
 } from '@angular/forms';
 
 import {
-  Router
+    Router
 } from '@angular/router';
 
 import {
-  NzFormModule
+    NzFormModule
 } from 'ng-zorro-antd/form';
 
 import {
-  NzInputModule
+    NzInputModule
 } from 'ng-zorro-antd/input';
 
 import {
-  NzButtonModule
+    NzButtonModule
 } from 'ng-zorro-antd/button';
 
 import {
-  Auth
+    Auth
 } from '../services/auth';
 
 
 @Component({
-  selector: 'app-login',
+    selector: 'app-login',
 
-  standalone: true,
+    standalone: true,
 
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    NzFormModule,
-    NzInputModule,
-    NzButtonModule,
-    RouterLink
-  ],
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        NzFormModule,
+        NzInputModule,
+        NzButtonModule,
+        NzIconModule,
+        RouterLink
+    ],
 
-  templateUrl: './login.html',
+    templateUrl: './login.html',
 
-  styleUrl: './login.scss'
+    styleUrl: './login.scss'
 })
 export class Login {
 
@@ -61,7 +68,9 @@ export class Login {
     constructor(
         private fb: FormBuilder,
         private authService: Auth,
-        private router: Router
+        private router: Router,
+        private notification: NzNotificationService,
+        private cdr: ChangeDetectorRef
     ) {
 
         this.loginForm =
@@ -86,14 +95,13 @@ export class Login {
 
     }
 
-    goToForgotPassword(): void{
+    goToForgotPassword(): void {
 
-  this.router.navigate([
-    '/forgot-password'
-  ]);
+        this.router.navigate([
+            '/forgot-password'
+        ]);
 
-}
-
+    }
 
     submit(): void {
 
@@ -101,12 +109,14 @@ export class Login {
 
             this.loginForm.markAllAsTouched();
 
-            return;
+            this.cdr.detectChanges();
 
+            return;
         }
 
-
         this.isLoading = true;
+
+        this.cdr.detectChanges();
 
 
         const loginData = {
@@ -120,13 +130,22 @@ export class Login {
         };
 
 
-
-
         this.authService
             .login(loginData)
+            .pipe(
+
+                finalize(() => {
+
+                    this.isLoading = false;
+
+                    this.cdr.detectChanges();
+
+                })
+
+            )
             .subscribe({
 
-                next: (response:any) => {
+                next: (response: any) => {
 
                     console.log(
                         'Login successful',
@@ -161,7 +180,7 @@ export class Login {
                     );
 
 
-                    this.isLoading = false;
+                    this.cdr.detectChanges();
 
 
                     // -----------------------
@@ -175,7 +194,7 @@ export class Login {
                 },
 
 
-                error: (error:any) => {
+                error: (error: any) => {
 
                     console.error(
                         'Login failed',
@@ -183,13 +202,14 @@ export class Login {
                     );
 
 
-                    this.isLoading = false;
-
-
-                    alert(
+                    this.notification.error(
+                        'Invalid email or password',
                         error.error?.message ||
-                        'Invalid email or password'
+                        'Please check your credentials and try again.'
                     );
+
+
+                    this.cdr.detectChanges();
 
                 }
 
