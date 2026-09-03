@@ -1,5 +1,6 @@
 import {
-  Component
+  Component,
+  ChangeDetectorRef
 } from '@angular/core';
 
 import {
@@ -114,7 +115,9 @@ export class ForgotPassword {
       Auth,
 
     private router:
-      Router
+      Router,
+    
+    private cdr: ChangeDetectorRef
 
   ) {}
 
@@ -123,296 +126,177 @@ export class ForgotPassword {
   // SEND OTP
   // ===================================================
 
-  sendOtp(): void {
+sendOtp(): void {
 
-    this.errorMessage =
-      '';
-
-    this.successMessage =
-      '';
-
-
-    const email =
-      this.email
-        .trim();
-
-
-    if (!email) {
-
-      this.errorMessage =
-        'Please enter your email address.';
-
-      return;
-
+    if (!this.email) {
+        this.errorMessage = 'Please enter your email address.';
+        this.cdr.detectChanges();
+        return;
     }
 
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
 
-    this.isLoading =
-      true;
-
+    this.cdr.detectChanges();
 
     this.authService
-      .forgotPassword(
-        email
-      )
-      .pipe(
+        .forgotPassword(this.email)
+        .pipe(
+            finalize(() => {
+                this.isLoading = false;
+                this.cdr.detectChanges();
+            })
+        )
+        .subscribe({
+            next: (response: any) => {
 
-        finalize(() => {
+                this.successMessage =
+                    response.message ||
+                    'OTP sent successfully.';
 
-          this.isLoading =
-            false;
+                this.step = 2;
 
-        })
+                this.cdr.detectChanges();
+            },
 
-      )
-      .subscribe({
+            error: (error: any) => {
 
-        next: (
-          response
-        ) => {
+                this.errorMessage =
+                    error.error?.message ||
+                    'Unable to send OTP. Please try again.';
 
-          this.step =
-            2;
-
-          this.successMessage =
-            response.message;
-
-        },
-
-
-        error: (
-          error
-        ) => {
-
-          console.error(
-            'Forgot password error:',
-            error
-          );
-
-          this.errorMessage =
-            error.error?.message ||
-            'Unable to send reset OTP.';
-
-        }
-
-      });
-
-  }
+                this.cdr.detectChanges();
+            }
+        });
+}
 
 
   // ===================================================
   // VERIFY OTP
   // ===================================================
 
-  verifyOtp(): void {
+verifyOtp(): void {
 
-    this.errorMessage =
-      '';
-
-    this.successMessage =
-      '';
-
-
-    const email =
-      this.email
-        .trim();
-
-
-    const otp =
-      this.otp
-        .trim();
-
-
-    if (!otp) {
-
-      this.errorMessage =
-        'Please enter the OTP.';
-
-      return;
-
+    if (!this.otp || this.otp.length !== 6) {
+        this.errorMessage = 'Please enter the 6-digit OTP.';
+        this.cdr.detectChanges();
+        return;
     }
 
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
 
-    this.isLoading =
-      true;
-
+    this.cdr.detectChanges();
 
     this.authService
-      .verifyPasswordResetOtp(
-        email,
-        otp
-      )
-      .pipe(
+        .verifyPasswordResetOtp(
+            this.email,
+            this.otp
+        )
+        .pipe(
+            finalize(() => {
+                this.isLoading = false;
+                this.cdr.detectChanges();
+            })
+        )
+        .subscribe({
+            next: (response: any) => {
 
-        finalize(() => {
+                this.resetToken =
+                    response.resetToken;
 
-          this.isLoading =
-            false;
+                this.successMessage =
+                    response.message ||
+                    'OTP verified successfully.';
 
-        })
+                this.step = 3;
 
-      )
-      .subscribe({
+                this.cdr.detectChanges();
+            },
 
-        next: (
-          response
-        ) => {
+            error: (error: any) => {
 
-          this.resetToken =
-            response.resetToken;
+                this.errorMessage =
+                    error.error?.message ||
+                    'Invalid or expired OTP.';
 
-          this.step =
-            3;
-
-          this.successMessage =
-            'OTP verified successfully.';
-
-        },
-
-
-        error: (
-          error
-        ) => {
-
-          console.error(
-            'OTP verification error:',
-            error
-          );
-
-          this.errorMessage =
-            error.error?.message ||
-            'Invalid or expired OTP.';
-
-        }
-
-      });
-
-  }
+                this.cdr.detectChanges();
+            }
+        });
+}
 
 
   // ===================================================
   // RESET PASSWORD
   // ===================================================
 
-  resetPassword(): void {
+resetPassword(): void {
 
-    this.errorMessage =
-      '';
+    if (!this.newPassword ||
+        !this.confirmPassword) {
 
-    this.successMessage =
-      '';
+        this.errorMessage =
+            'Please enter and confirm your password.';
 
-
-    if (
-      !this.newPassword ||
-      !this.confirmPassword
-    ) {
-
-      this.errorMessage =
-        'Please enter both password fields.';
-
-      return;
-
+        this.cdr.detectChanges();
+        return;
     }
 
+    if (this.newPassword !== this.confirmPassword) {
 
-    if (
-      this.newPassword !==
-      this.confirmPassword
-    ) {
+        this.errorMessage =
+            'Passwords do not match.';
 
-      this.errorMessage =
-        'Passwords do not match.';
-
-      return;
-
+        this.cdr.detectChanges();
+        return;
     }
 
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
 
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{9,}$/;
-
-
-    if (
-      !passwordRegex.test(
-        this.newPassword
-      )
-    ) {
-
-      this.errorMessage =
-        'Password must contain at least 9 characters, one uppercase, one lowercase, one number and one special character.';
-
-      return;
-
-    }
-
-
-    this.isLoading =
-      true;
-
+    this.cdr.detectChanges();
 
     this.authService
-      .resetPassword(
+        .resetPassword(
+            this.resetToken,
+            this.newPassword,
+            this.confirmPassword
+        )
+        .pipe(
+            finalize(() => {
+                this.isLoading = false;
+                this.cdr.detectChanges();
+            })
+        )
+        .subscribe({
+            next: (response: any) => {
 
-        this.resetToken,
+                this.successMessage =
+                    response.message ||
+                    'Password reset successfully.';
 
-        this.newPassword,
+                this.cdr.detectChanges();
 
-        this.confirmPassword
+                setTimeout(() => {
+                    this.router.navigate([
+                        '/login'
+                    ]);
+                }, 1500);
+            },
 
-      )
-      .pipe(
+            error: (error: any) => {
 
-        finalize(() => {
+                this.errorMessage =
+                    error.error?.message ||
+                    'Unable to reset password.';
 
-          this.isLoading =
-            false;
-
-        })
-
-      )
-      .subscribe({
-
-        next: (
-          response
-        ) => {
-
-          this.successMessage =
-            response.message;
-
-          this.step =
-            1;
-
-          this.otp =
-            '';
-
-          this.newPassword =
-            '';
-
-          this.confirmPassword =
-            '';
-
-        },
-
-
-        error: (
-          error
-        ) => {
-
-          console.error(
-            'Password reset error:',
-            error
-          );
-
-          this.errorMessage =
-            error.error?.message ||
-            'Unable to reset password.';
-
-        }
-
-      });
-
-  }
+                this.cdr.detectChanges();
+            }
+        });
+}
 
 
   // ===================================================

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component ,ChangeDetectorRef } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -15,6 +15,8 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { Auth, RegisterRequest } from '../services/auth';
 import { RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
 
 @Component({
   selector: 'app-register',
@@ -43,7 +45,9 @@ export class Register {
 
   constructor(
     private fb: FormBuilder,
-    private authService: Auth
+    private authService: Auth,
+    private cdr: ChangeDetectorRef,
+    private notification: NzNotificationService
   ) {
 
     this.registerForm = this.fb.group(
@@ -129,273 +133,288 @@ export class Register {
 
 submit(): void {
 
-    if (!this.emailVerified) {
+  if (!this.emailVerified) {
 
-        alert(
-            'Please verify your email before registering'
+    alert(
+      'Please verify your email before registering'
+    );
+
+    return;
+  }
+
+  if (this.registerForm.invalid) {
+
+    this.registerForm.markAllAsTouched();
+
+    this.cdr.detectChanges();
+
+    return;
+  }
+
+  const formValue =
+    this.registerForm.getRawValue();
+
+  const formData: RegisterRequest = {
+
+    firstName:
+      formValue.firstName,
+
+    lastName:
+      formValue.lastName,
+
+    email:
+      formValue.email,
+
+    password:
+      formValue.password,
+
+    confirmPassword:
+      formValue.confirmPassword,
+
+    verificationToken:
+      this.verificationToken
+
+  };
+
+  this.isLoading = true;
+
+  this.cdr.detectChanges();
+
+  this.authService
+    .register(formData)
+    .pipe(
+      finalize(() => {
+
+        this.isLoading = false;
+
+        this.cdr.detectChanges();
+
+      })
+    )
+    .subscribe({
+
+      next: (response) => {
+
+        console.log(
+          'Registration successful:',
+          response
         );
 
-        return;
+        this.registerForm.reset();
 
-    }
+        this.emailOtpSent = false;
 
+        this.emailVerified = false;
 
-    if (this.registerForm.invalid) {
+        this.verificationToken = '';
 
-        this.registerForm.markAllAsTouched();
+        this.cdr.detectChanges();
 
-        return;
+        alert(
+          'Registration successful!'
+        );
 
-    }
+      },
 
+      error: (error) => {
 
-    const formValue =
-        this.registerForm.getRawValue();
+        console.error(
+          'Registration failed:',
+          error
+        );
 
+        this.cdr.detectChanges();
 
-    const formData: RegisterRequest = {
+        alert(
+          error.error?.message ||
+          'Registration failed'
+        );
 
-        firstName:
-            formValue.firstName,
+      }
 
-        lastName:
-            formValue.lastName,
-
-        email:
-            formValue.email,
-
-        password:
-            formValue.password,
-
-        confirmPassword:
-            formValue.confirmPassword,
-
-        verificationToken:
-            this.verificationToken
-
-    };
-
-
-    this.isLoading = true;
-
-
-    this.authService
-        .register(formData)
-        .subscribe({
-
-            next: (response) => {
-
-                this.isLoading = false;
-
-                console.log(
-                    'Registration successful:',
-                    response
-                );
-
-                alert(
-                    'Registration successful!'
-                );
-
-                this.registerForm.reset();
-
-                this.emailOtpSent = false;
-
-                this.emailVerified = false;
-
-                this.verificationToken = '';
-
-            },
-
-
-            error: (error) => {
-
-                this.isLoading = false;
-
-                console.error(
-                    'Registration failed:',
-                    error
-                );
-
-                alert(
-                    error.error?.message ||
-                    'Registration failed'
-                );
-
-            }
-
-        });
+    });
 
 }
 
-  sendOtp(): void {
+sendOtp(): void {
 
-    const emailControl =
-        this.registerForm.get('email');
+  const emailControl =
+    this.registerForm.get('email');
 
+  if (
+    !emailControl ||
+    emailControl.invalid
+  ) {
 
-    if (
-        !emailControl ||
-        emailControl.invalid
-    ) {
+    emailControl?.markAsTouched();
 
-        emailControl?.markAsTouched();
+    this.cdr.detectChanges();
 
-        return;
+    return;
+  }
 
-    }
+  const email =
+    emailControl.value;
 
+  this.isSendingOtp = true;
 
-    const email =
-        emailControl.value;
+  this.cdr.detectChanges();
 
+  this.authService
+    .sendOtp(email)
+    .pipe(
+      finalize(() => {
 
-    this.isSendingOtp = true;
+        this.isSendingOtp = false;
 
+        this.cdr.detectChanges();
 
-    this.authService
-        .sendOtp(email)
-        .subscribe({
+      })
+    )
+    .subscribe({
 
-            next: (response) => {
+      next: (response) => {
 
-                console.log(
-                    'OTP sent:',
-                    response
-                );
+        console.log(
+          'OTP sent:',
+          response
+        );
 
-                this.isSendingOtp = false;
+        this.emailOtpSent = true;
 
-                this.emailOtpSent = true;
+        this.emailVerified = false;
 
-                this.emailVerified = false;
+        this.cdr.detectChanges();
 
-                alert(
-                    'OTP sent to your email'
-                );
+this.notification.success(
+  'OTP Sent',
+  'A verification code has been sent to your email address.'
+);
 
-            },
+      },
 
-            error: (error) => {
+      error: (error) => {
 
-                console.error(
-                    'Send OTP failed:',
-                    error
-                );
+        console.error(
+          'Send OTP failed:',
+          error
+        );
 
-                this.isSendingOtp = false;
+        this.cdr.detectChanges();
 
-                alert(
-                    error.error?.message ||
-                    'Failed to send OTP'
-                );
+        alert(
+          error.error?.message ||
+          'Failed to send OTP'
+        );
 
-            }
+      }
 
-        });
-
+    });
 }
 
 verifyOtp(): void {
 
-    const emailControl =
-        this.registerForm.get('email');
+  const emailControl =
+    this.registerForm.get('email');
 
-    const otpControl =
-        this.registerForm.get('otp');
+  const otpControl =
+    this.registerForm.get('otp');
 
+  if (
+    !emailControl ||
+    emailControl.invalid
+  ) {
 
-    if (
-        !emailControl ||
-        emailControl.invalid
-    ) {
+    emailControl?.markAsTouched();
 
-        emailControl?.markAsTouched();
+    this.cdr.detectChanges();
 
-        return;
+    return;
+  }
 
-    }
+  if (
+    !otpControl ||
+    otpControl.invalid
+  ) {
 
+    otpControl?.markAsTouched();
 
-    if (
-        !otpControl ||
-        otpControl.invalid
-    ) {
+    this.cdr.detectChanges();
 
-        otpControl?.markAsTouched();
+    return;
+  }
 
-        return;
+  const email =
+    emailControl.value;
 
-    }
+  const otp =
+    otpControl.value;
 
+  this.isVerifyingOtp = true;
 
-    const email =
-        emailControl.value;
+  this.cdr.detectChanges();
 
-    const otp =
-        otpControl.value;
+  this.authService
+    .verifyOtp(email, otp)
+    .pipe(
+      finalize(() => {
 
+        this.isVerifyingOtp = false;
 
-    this.isVerifyingOtp = true;
+        this.cdr.detectChanges();
 
+      })
+    )
+    .subscribe({
 
-    this.authService
-        .verifyOtp(email, otp)
-        .subscribe({
+      next: (response) => {
 
-            next: (response) => {
+        console.log(
+          'OTP verified:',
+          response
+        );
 
-                console.log(
-                    'OTP verified:',
-                    response
-                );
+        this.emailVerified = true;
 
+        this.verificationToken =
+          response.verificationToken;
 
-                this.isVerifyingOtp = false;
+        this.registerForm
+          .get('email')
+          ?.disable();
 
-                this.emailVerified = true;
+        this.registerForm
+          .get('otp')
+          ?.disable();
 
-                this.verificationToken =
-                    response.verificationToken;
+        this.cdr.detectChanges();
 
+this.notification.success(
+  'Email Verified',
+  'Your email address has been successfully verified.'
+);
 
-                this.registerForm
-                    .get('email')
-                    ?.disable();
+      },
 
+      error: (error) => {
 
-                this.registerForm
-                    .get('otp')
-                    ?.disable();
+        console.error(
+          'OTP verification failed:',
+          error
+        );
 
+        this.emailVerified = false;
 
-                alert(
-                    'Email verified successfully!'
-                );
+        this.cdr.detectChanges();
 
-            },
+this.notification.error(
+  'Unable to Send OTP',
+  error.error?.message ||
+  'Please try again.'
+);
 
+      }
 
-            error: (error) => {
-
-                console.error(
-                    'OTP verification failed:',
-                    error
-                );
-
-
-                this.isVerifyingOtp = false;
-
-                this.emailVerified = false;
-
-
-                alert(
-                    error.error?.message ||
-                    'Invalid OTP'
-                );
-
-            }
-
-        });
-
+    });
 }
 }
