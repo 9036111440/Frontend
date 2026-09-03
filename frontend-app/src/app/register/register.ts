@@ -9,6 +9,9 @@ import {
   ValidatorFn,
   Validators
 } from '@angular/forms';
+import {
+    NzIconModule
+} from 'ng-zorro-antd/icon';
 
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -27,7 +30,8 @@ import { NzNotificationService } from 'ng-zorro-antd/notification';
     NzFormModule,
     NzInputModule,
     NzButtonModule,
-    RouterLink
+    RouterLink,
+    NzIconModule
   ],
   templateUrl: './register.html',
   styleUrl: './register.scss',
