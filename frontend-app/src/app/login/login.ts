@@ -86,6 +86,14 @@ export class Login {
 
     }
 
+    goToForgotPassword(): void{
+
+  this.router.navigate([
+    '/forgot-password'
+  ]);
+
+}
+
 
     submit(): void {
 
@@ -110,6 +118,8 @@ export class Login {
                 this.loginForm.value.password
 
         };
+
+
 
 
         this.authService

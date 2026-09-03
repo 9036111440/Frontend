@@ -631,6 +631,72 @@
   margin-right: 8px;
 }
 
+/* =========================================================
+   FORGOT PASSWORD
+   ========================================================= */
+
+.forgot-password-link {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-top: -10px;
+  margin-bottom: 8px;
+}
+
+
+.forgot-password-link button {
+  padding: 0;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  color: #6552e8;
+
+  font-size: 12.5px;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+.forgot-password-link button:hover {
+  color: #4938c9;
+
+  transform: translateX(1px);
+}
+
+
+.forgot-password-link button:focus-visible {
+  border-radius: 4px;
+
+  outline: 2px solid rgba(101, 82, 232, 0.25);
+  outline-offset: 3px;
+}
+
+
+/* =========================================================
+   RESPONSIVE - FORGOT PASSWORD
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .forgot-password-link {
+    margin-top: -6px;
+    margin-bottom: 6px;
+  }
+
+  .forgot-password-link button {
+    font-size: 12px;
+  }
+
+}
+
 
 /* =========================================================
    REGISTER

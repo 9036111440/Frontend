@@ -144,5 +144,71 @@ clearAuthData(): void {
 
 }
 
+// =====================================================
+// FORGOT PASSWORD
+// =====================================================
+
+forgotPassword(
+  email: string
+) {
+
+  return this.http.post<{
+    message: string;
+  }>(
+    `${this.apiUrl}/forgot-password`,
+    {
+      email
+    }
+  );
+
+}
+
+
+// =====================================================
+// VERIFY PASSWORD RESET OTP
+// =====================================================
+
+verifyPasswordResetOtp(
+  email: string,
+  otp: string
+) {
+
+  return this.http.post<{
+    message: string;
+    resetToken: string;
+  }>(
+    `${this.apiUrl}/verify-password-reset-otp`,
+    {
+      email,
+      otp
+    }
+  );
+
+}
+
+
+// =====================================================
+// RESET PASSWORD
+// =====================================================
+
+resetPassword(
+  resetToken: string,
+  newPassword: string,
+  confirmPassword: string
+) {
+
+  return this.http.post<{
+    message: string;
+  }>(
+    `${this.apiUrl}/reset-password`,
+    {
+      resetToken,
+      newPassword,
+      confirmPassword
+    }
+  );
+
+}
+
 
 }
