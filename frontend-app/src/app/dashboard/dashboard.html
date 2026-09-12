@@ -40,6 +40,20 @@
 
       </button>
 
+      <button
+  type="button"
+  class="new-group-button"
+  (click)="openCreateGroupModal()"
+>
+  <span class="new-group-icon">
+    👥
+  </span>
+
+  <span>
+    Create group
+  </span>
+</button>
+
     </div>
 
 
@@ -119,14 +133,19 @@
             "
           >
 
-            <div class="conversation-icon">
-
-              <span
-                nz-icon
-                nzType="message"
-              ></span>
-
-            </div>
+        <div
+          class="conversation-icon"
+          [class.group-conversation-icon]="conversation.isGroup"
+        >
+          <span
+            nz-icon
+            [nzType]="
+              conversation.isGroup
+                ? 'team'
+                : 'message'
+            "
+          ></span>
+        </div>
 
 
             <div class="conversation-details">
@@ -138,12 +157,23 @@
               </span>
 
 
-              <span class="conversation-meta">
+<span class="conversation-meta">
 
-                {{ conversation.messageCount }}
-                {{ conversation.messageCount === 1 ? 'message' : 'messages' }}
+  @if (conversation.isGroup) {
 
-              </span>
+    👥 {{ conversation.messageCount }}
+    {{ conversation.messageCount === 1 ? 'message' : 'messages' }}
+
+  }
+
+  @else {
+
+    {{ conversation.messageCount }}
+    {{ conversation.messageCount === 1 ? 'message' : 'messages' }}
+
+  }
+
+</span>
 
             </div>
 
@@ -471,25 +501,58 @@
         </span>
 
 
-        <span class="header-chat-title">
+<span class="header-chat-title">
 
-          @if (conversationId) {
+  @if (conversationId) {
 
-            Chat
+    @if (isGroupChat) {
 
-          }
-          @else {
+      👥 {{ getCurrentConversationTitle() }}
 
-            New conversation
+    }
 
-          }
+    @else {
 
-        </span>
+      {{ getCurrentConversationTitle() }}
+
+    }
+
+  }
+
+  @else {
+
+    New conversation
+
+  }
+
+</span>
 
       </div>
 
 
       <div class="header-right">
+
+        @if (isGroupChat && conversationId) {
+
+  <button
+    type="button"
+    class="group-info-button"
+    title="Group information"
+    (click)="openGroupInfo()"
+  >
+
+    <span
+      nz-icon
+      nzType="team"
+    ></span>
+
+    <span>
+      Group
+    </span>
+
+  </button>
+
+}
 <!-- PDF ACTION MENU -->
 <div class="pdf-menu-wrapper">
 
@@ -648,7 +711,7 @@
 
             <button
               class="suggestion-card"
-              (click)="message = ' hello, do u want me to Explain any important laws to be known by a indian citizen'"
+              (click)="message = 'Explain something about important basic legal indian laws'"
             >
 
               <span class="suggestion-icon blue">
@@ -662,7 +725,7 @@
 
               <span class="suggestion-text">
 
-                Explain any important laws to be known by a indian citizen
+                Explain something about important basic legal indian laws
 
               </span>
 
@@ -1230,5 +1293,432 @@
     </div>
 
   </main>
+
+  <!-- =====================================================
+     CREATE GROUP MODAL
+     ===================================================== -->
+
+@if (showCreateGroupModal) {
+
+  <div
+    class="group-modal-backdrop"
+    (click)="closeCreateGroupModal()"
+  >
+
+    <div
+      class="group-modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <!-- HEADER -->
+
+      <div class="group-modal-header">
+
+        <div>
+
+          <div class="group-modal-icon">
+            👥
+          </div>
+
+          <div>
+
+            <h2>
+              Create a group
+            </h2>
+
+            <p>
+              Start a shared AI conversation
+              with your friends.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="group-modal-close"
+          (click)="closeCreateGroupModal()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- FORM -->
+
+      <div class="group-form">
+
+        <label>
+          Group name
+        </label>
+
+
+        <input
+          type="text"
+          [(ngModel)]="newGroupTitle"
+          placeholder="e.g. Final Year Project Team"
+          maxlength="80"
+          (keyup.enter)="createGroup()"
+        />
+
+
+        <span class="group-form-hint">
+          You can invite friends after creating
+          the group.
+        </span>
+
+      </div>
+
+
+      <!-- ACTIONS -->
+
+      <div class="group-modal-actions">
+
+        <button
+          type="button"
+          class="group-cancel-button"
+          (click)="closeCreateGroupModal()"
+          [disabled]="isCreatingGroup"
+        >
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="group-create-button"
+          (click)="createGroup()"
+          [disabled]="
+            isCreatingGroup ||
+            !newGroupTitle.trim()
+          "
+        >
+
+          @if (isCreatingGroup) {
+
+            <span
+              nz-icon
+              nzType="loading"
+            ></span>
+
+            Creating...
+
+          }
+
+          @else {
+
+            👥 Create Group
+
+          }
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+}
+
+<!-- =====================================================
+     GROUP INFO MODAL
+     ===================================================== -->
+
+@if (
+  showGroupInfoModal &&
+  isGroupChat
+) {
+
+  <div
+    class="group-modal-backdrop"
+    (click)="closeGroupInfo()"
+  >
+
+    <div
+      class="group-modal group-info-modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <!-- HEADER -->
+
+      <div class="group-modal-header">
+
+        <div>
+
+          <div class="group-modal-icon">
+            👥
+          </div>
+
+          <div>
+
+            <h2>
+              {{ getCurrentConversationTitle() }}
+            </h2>
+
+            <p>
+              Manage your shared AI conversation.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="group-modal-close"
+          (click)="closeGroupInfo()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- INVITE -->
+
+      <div class="group-section">
+
+        <div class="group-section-title">
+          Invite friends
+        </div>
+
+        <div class="group-section-description">
+          Create a secure invitation link and
+          share it with your friends.
+        </div>
+
+
+        @if (!inviteLink) {
+
+          <button
+            type="button"
+            class="invite-button"
+            (click)="createInviteLink()"
+            [disabled]="isCreatingInvite"
+          >
+
+            @if (isCreatingInvite) {
+
+              <span
+                nz-icon
+                nzType="loading"
+              ></span>
+
+              Creating invite...
+
+            }
+
+            @else {
+
+              <span
+                nz-icon
+                nzType="link"
+              ></span>
+
+              Create invite link
+
+            }
+
+          </button>
+
+        }
+
+
+        @if (inviteLink) {
+
+          <div class="invite-link-box">
+
+            <input
+              type="text"
+              [value]="inviteLink"
+              readonly
+            />
+
+
+            <button
+              type="button"
+              class="copy-invite-button"
+              (click)="copyInviteLink()"
+            >
+
+              @if (inviteCopied) {
+
+                ✓ Copied
+
+              }
+
+              @else {
+
+                Copy
+
+              }
+
+            </button>
+
+          </div>
+
+
+          <span class="invite-expiry">
+            This invitation link expires in
+            24 hours.
+          </span>
+
+        }
+
+      </div>
+
+
+      <!-- MEMBERS -->
+
+      <div class="group-section">
+
+        <div class="group-section-title">
+          Members
+        </div>
+
+
+        @if (isLoadingMembers) {
+
+          <div class="members-loading">
+
+            <span
+              nz-icon
+              nzType="loading"
+            ></span>
+
+            Loading members...
+
+          </div>
+
+        }
+
+        @else {
+
+          <div class="members-list">
+
+            @for (
+              member of groupMembers;
+              track member.userId
+            ) {
+
+              <div class="member-row">
+
+                <div class="member-avatar">
+
+                  {{
+                    (
+                      typeof member.userId === 'string'
+                        ? 'U'
+                        : (
+                            (
+                              member.userId.firstName ||
+                              ''
+                            ).charAt(0)
+                          )
+                    ).toUpperCase()
+                  }}
+
+                </div>
+
+
+                <div class="member-details">
+
+                  <strong>
+
+                    @if (
+                      typeof member.userId === 'string'
+                    ) {
+
+                      User
+
+                    }
+
+                    @else {
+
+                      {{
+                        (
+                          member.userId.firstName ||
+                          ''
+                        ) +
+
+                        ' ' +
+
+                        (
+                          member.userId.lastName ||
+                          ''
+                        )
+                      }}
+
+                    }
+
+                  </strong>
+
+
+                  <span>
+
+                    @if (
+                      member.role === 'owner'
+                    ) {
+
+                      Owner
+
+                    }
+
+                    @else {
+
+                      Member
+
+                    }
+
+                  </span>
+
+                </div>
+
+
+                @if (
+                  member.role === 'owner'
+                ) {
+
+                  <span class="owner-badge">
+                    Owner
+                  </span>
+
+                }
+
+                @else if (
+                  isGroupOwner(member)
+                ) {
+
+                  <button
+                    type="button"
+                    class="remove-member-button"
+                    title="Remove member"
+                    (click)="removeGroupMember(member)"
+                  >
+                    Remove
+                  </button>
+
+                }
+
+              </div>
+
+            }
+
+          </div>
+
+        }
+
+      </div>
+
+    </div>
+
+  </div>
+
+}
 
 </div>
