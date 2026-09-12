@@ -15,6 +15,10 @@ import {
   guestGuard
 } from './guards/guest.guard';
 
+import {
+  GroupJoin
+} from './group-join/group-join';
+
 
 export const routes: Routes = [
 
@@ -128,6 +132,11 @@ export const routes: Routes = [
           m => m.Admin
         )
   },
+
+  {
+  path: 'join/group/:token',
+  component: GroupJoin
+},
 
 
   // ==========================================

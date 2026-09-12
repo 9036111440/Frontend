@@ -19,7 +19,7 @@ import {
 } from '@angular/forms';
 
 import {
-    Router
+    Router, ActivatedRoute
 } from '@angular/router';
 
 import {
@@ -69,6 +69,7 @@ export class Login {
         private fb: FormBuilder,
         private authService: Auth,
         private router: Router,
+        private route: ActivatedRoute,
         private notification: NzNotificationService,
         private cdr: ChangeDetectorRef
     ) {
@@ -187,9 +188,13 @@ export class Login {
                     // Navigate dashboard
                     // -----------------------
 
-                    this.router.navigate([
-                        '/dashboard'
-                    ]);
+ const returnUrl =
+    this.getSafeReturnUrl();
+
+
+this.router.navigateByUrl(
+    returnUrl
+);
 
                 },
 
@@ -204,7 +209,6 @@ export class Login {
 
                     this.notification.error(
                         'Invalid email or password',
-                        error.error?.message ||
                         'Please check your credentials and try again.'
                     );
 
@@ -217,4 +221,55 @@ export class Login {
 
     }
 
+    // =====================================================
+// GET SAFE RETURN URL
+// =====================================================
+
+private getSafeReturnUrl(): string {
+
+    const returnUrl =
+        this.route.snapshot.queryParamMap.get(
+            'returnUrl'
+        );
+
+
+    // -----------------------------------------------
+    // No return URL
+    // -----------------------------------------------
+
+    if (!returnUrl) {
+
+        return '/dashboard';
+
+    }
+
+
+    // -----------------------------------------------
+    // Only allow internal application paths
+    // -----------------------------------------------
+
+    if (
+        !returnUrl.startsWith('/')
+    ) {
+
+        return '/dashboard';
+
+    }
+
+
+    // Prevent protocol-relative URLs
+    // such as //evil-site.com
+
+    if (
+        returnUrl.startsWith('//')
+    ) {
+
+        return '/dashboard';
+
+    }
+
+
+    return returnUrl;
+
+}
 }

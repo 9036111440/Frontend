@@ -1,0 +1,172 @@
+<div class="join-page">
+
+  <div class="join-card">
+
+    <!-- ========================================= -->
+    <!-- ICON -->
+    <!-- ========================================= -->
+
+    <div class="join-icon">
+      👥
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- SUCCESS -->
+    <!-- ========================================= -->
+
+    @if (isJoined) {
+
+      <div class="join-status success">
+
+        <div class="status-icon">
+          ✓
+        </div>
+
+        <h1>
+          Welcome to the group!
+        </h1>
+
+        <p>
+          You joined
+          <strong>
+            {{ groupTitle }}
+          </strong>
+          successfully.
+        </p>
+
+        <p class="redirect-text">
+          Opening your dashboard...
+        </p>
+
+      </div>
+
+    }
+
+    @else {
+
+      <!-- ========================================= -->
+      <!-- TITLE -->
+      <!-- ========================================= -->
+
+      <div class="join-content">
+
+        <span class="eyebrow">
+          GROUP INVITATION
+        </span>
+
+        <h1>
+          You've been invited
+        </h1>
+
+        <p>
+          Someone invited you to join a
+          shared AI conversation with their group.
+        </p>
+
+
+        <!-- ======================================= -->
+        <!-- GROUP CARD -->
+        <!-- ======================================= -->
+
+        <div class="group-preview">
+
+          <div class="preview-icon">
+            👥
+          </div>
+
+          <div class="preview-content">
+
+            <strong>
+              AI Collaborative Group
+            </strong>
+
+            <span>
+              Share messages and AI context
+              with your group members.
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- ======================================= -->
+        <!-- ERROR -->
+        <!-- ======================================= -->
+
+        @if (errorMessage) {
+
+          <div class="error-box">
+
+            <span>
+              ⚠
+            </span>
+
+            <span>
+              {{ errorMessage }}
+            </span>
+
+          </div>
+
+        }
+
+
+        <!-- ======================================= -->
+        <!-- JOIN -->
+        <!-- ======================================= -->
+
+        <button
+          type="button"
+          class="join-button"
+          (click)="joinGroup()"
+          [disabled]="isJoining"
+        >
+
+          @if (isJoining) {
+
+            <span class="loading-spinner"></span>
+
+            Joining group...
+
+          }
+
+          @else {
+
+            <span>
+              👥
+            </span>
+
+            Join Group
+
+          }
+
+        </button>
+
+
+        <!-- ======================================= -->
+        <!-- LOGIN -->
+        <!-- ======================================= -->
+
+        @if (!isJoining) {
+
+          <button
+            type="button"
+            class="login-button"
+            (click)="goToLogin()"
+          >
+            Already have an account?
+            <strong>
+              Log in
+            </strong>
+          </button>
+
+        }
+
+      </div>
+
+    }
+
+  </div>
+
+</div>
