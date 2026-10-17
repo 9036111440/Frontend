@@ -1140,7 +1140,8 @@
          COMPOSER
          =================================================== -->
 
-    <div class="composer-area">
+         
+<div class="composer-area">
 
 
       <!-- SELECTED FILE -->
@@ -1250,6 +1251,85 @@
           ></textarea>
 
 
+          <!-- VOICE RECORDING BUTTON -->
+
+
+<!-- VOICE CHAT: PRO USERS ONLY -->
+
+@if (isPro) {
+
+  <button
+    type="button"
+    class="voice-button"
+    [class.recording]="isRecording"
+    [disabled]="isLoading || isTranscribingVoice"
+    [attr.aria-label]="isRecording ? 'Stop recording' : 'Start voice chat'"
+    [title]="isRecording ? 'Stop recording' : 'Start voice chat'"
+    (click)="toggleVoiceRecording()"
+  >
+    <span
+      nz-icon
+      [nzType]="isRecording ? 'stop' : 'audio'"
+    ></span>
+  </button>
+
+  @if (isSpeaking) {
+
+    <button
+      type="button"
+      class="voice-button"
+      title="Stop spoken response"
+      (click)="stopAssistantAudio()"
+    >
+      <span
+        nz-icon
+        nzType="pause-circle"
+      ></span>
+    </button>
+
+  }
+
+}
+
+@else {
+
+  <button
+    type="button"
+    class="voice-button voice-pro-locked"
+    title="Voice chat is available on Pro"
+    aria-label="Upgrade to Pro for voice chat"
+    (click)="upgradeToPro()"
+  >
+    <span
+      nz-icon
+      nzType="crown"
+    ></span>
+  </button>
+
+}
+
+
+
+
+          <!-- STOP AI SPEECH BUTTON -->
+
+          @if (isSpeaking) {
+
+            <button
+              type="button"
+              class="voice-button"
+              title="Stop spoken response"
+              (click)="stopAssistantAudio()"
+            >
+              <span
+                nz-icon
+                nzType="pause-circle"
+              ></span>
+            </button>
+
+          }
+
+
           <!-- SEND -->
 
           <button
@@ -1287,6 +1367,34 @@
           Check important information.
 
         </div>
+
+
+        <!-- VOICE STATUS -->
+
+        @if (isRecording) {
+
+          <div class="voice-status recording-status">
+            <span class="voice-status-dot"></span>
+            Listening... Click the microphone button to finish.
+          </div>
+
+        }
+
+        @else if (isTranscribingVoice) {
+
+          <div class="voice-status">
+            Transcribing your voice...
+          </div>
+
+        }
+
+        @if (voiceErrorMessage) {
+
+          <div class="voice-status voice-error">
+            {{ voiceErrorMessage }}
+          </div>
+
+        }
 
       </div>
 

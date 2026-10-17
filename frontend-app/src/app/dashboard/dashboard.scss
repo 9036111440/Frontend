@@ -2153,6 +2153,107 @@
 }
 
 
+
+/* =====================================================
+   POLISHED VOICE BUTTON
+   ===================================================== */
+
+.composer .voice-button {
+  appearance: none;
+  -webkit-appearance: none;
+
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px;
+
+  flex: 0 0 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 !important;
+  margin: 0;
+
+  border: 1px solid #e8e5ff !important;
+  border-radius: 50% !important;
+
+  background: #f3f0ff !important;
+  color: #7060ed !important;
+
+  font-family: inherit;
+  font-size: 18px;
+  line-height: 1;
+
+  box-shadow: 0 2px 6px rgba(99, 85, 220, 0.06);
+
+  cursor: pointer;
+
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+/* Icon alignment */
+.composer .voice-button span[nz-icon] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hover */
+.composer .voice-button:hover:not(:disabled) {
+  background: #e6e0ff !important;
+  border-color: #c9bfff !important;
+  color: #5644d8 !important;
+
+  box-shadow: 0 4px 12px rgba(99, 85, 220, 0.14);
+
+  transform: translateY(-1px);
+}
+
+/* Keyboard accessibility */
+.composer .voice-button:focus-visible {
+  outline: 3px solid rgba(112, 96, 237, 0.25);
+  outline-offset: 3px;
+}
+
+/* Disabled state */
+.composer .voice-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Recording state */
+.composer .voice-button.recording {
+  background: #fee2e2 !important;
+  border-color: #fca5a5 !important;
+  color: #dc2626 !important;
+
+  animation: voice-button-pulse 1.4s ease-in-out infinite;
+}
+
+.composer .voice-button.recording:hover:not(:disabled) {
+  background: #fecaca !important;
+  color: #b91c1c !important;
+}
+
+/* Subtle recording animation */
+@keyframes voice-button-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.18);
+  }
+
+  50% {
+    box-shadow: 0 0 0 5px rgba(239, 68, 68, 0);
+  }
+}
+
+
 .composer:focus-within {
   border-color:
     #b8c1d1;

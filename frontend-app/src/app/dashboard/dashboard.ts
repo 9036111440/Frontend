@@ -22,6 +22,10 @@ import {
 } from '../services/group-chat.service';
 
 import {
+  VoiceService
+} from '../services/voice.service';
+
+import {
   NzButtonModule
 } from 'ng-zorro-antd/button';
 
@@ -366,6 +370,48 @@ isLoadingMembers =
   // TEMPORARY TEST GROUP
   // ===================================================
 
+
+  // ===================================================
+// VOICE CHAT STATE
+// ===================================================
+
+isRecording = false;
+
+isTranscribingVoice = false;
+
+isSpeaking = false;
+
+voiceErrorMessage = '';
+
+voiceLanguage: string | null = null;
+
+
+// ===================================================
+// BROWSER AUDIO RECORDING
+// ===================================================
+
+private mediaRecorder: MediaRecorder | null = null;
+
+private mediaStream: MediaStream | null = null;
+
+private recordedChunks: BlobPart[] = [];
+
+
+// ===================================================
+// SPEAK ONLY THE RESPONSE TO A VOICE QUESTION
+// ===================================================
+
+private speakNextVoiceReply = false;
+
+
+// ===================================================
+// AUDIO PLAYBACK
+// ===================================================
+
+private activeAudio: HTMLAudioElement | null = null;
+
+private activeAudioUrl: string | null = null;
+
   // ===================================================
   // CONSTRUCTOR
   // ===================================================
@@ -385,7 +431,9 @@ isLoadingMembers =
       Router,
 
     private groupChatService:
-      GroupChatService
+      GroupChatService,
+
+    private voiceService: VoiceService
 
   ) {}
 
@@ -584,8 +632,594 @@ this.groupChatService.onGroupAiResponse(
   ngOnDestroy(): void {
 
     this.groupChatService.disconnect();
+    // Stop recording safely when leaving the dashboard.
+if (this.mediaRecorder) {
+
+  this.mediaRecorder.onstop = null;
+  this.mediaRecorder.onerror = null;
+
+  if (this.mediaRecorder.state !== 'inactive') {
+    this.mediaRecorder.stop();
+  }
+
+  this.mediaRecorder = null;
+
+}
+
+this.mediaStream
+  ?.getTracks()
+  .forEach(track => track.stop());
+
+this.mediaStream = null;
+
+this.stopAssistantAudio();
 
   }
+
+
+  
+/**
+ * Start recording when the microphone button is clicked.
+ * Click it again to stop and submit the recording.
+ */
+async toggleVoiceRecording(): Promise<void> {
+
+  if (this.isRecording) {
+    this.stopVoiceRecording();
+    return;
+  }
+
+  if (
+    this.isLoading ||
+    this.isTranscribingVoice
+  ) {
+    return;
+  }
+
+  if (
+    !navigator.mediaDevices?.getUserMedia ||
+    typeof MediaRecorder === 'undefined'
+  ) {
+    this.voiceErrorMessage =
+      'Voice recording is not supported in this browser.';
+
+    this.cdr.markForCheck();
+    return;
+  }
+
+  this.voiceErrorMessage = '';
+
+  try {
+
+    this.mediaStream =
+      await navigator.mediaDevices.getUserMedia({
+        audio: true
+      });
+
+    this.recordedChunks = [];
+
+    const preferredMimeTypes = [
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/mp4',
+      'audio/ogg;codecs=opus'
+    ];
+
+    const supportedMimeType =
+      preferredMimeTypes.find(
+        type => MediaRecorder.isTypeSupported(type)
+      );
+
+    this.mediaRecorder =
+      supportedMimeType
+        ? new MediaRecorder(
+            this.mediaStream,
+            { mimeType: supportedMimeType }
+          )
+        : new MediaRecorder(this.mediaStream);
+
+    const recorder = this.mediaRecorder;
+
+    recorder.ondataavailable = (event: BlobEvent) => {
+
+      if (event.data && event.data.size > 0) {
+        this.recordedChunks.push(event.data);
+      }
+
+    };
+
+    recorder.onstop = () => {
+
+      const mimeType =
+        recorder.mimeType || 'audio/webm';
+
+      const audioBlob =
+        new Blob(
+          this.recordedChunks,
+          { type: mimeType }
+        );
+
+      this.recordedChunks = [];
+
+      this.mediaStream
+        ?.getTracks()
+        .forEach(track => track.stop());
+
+      this.mediaStream = null;
+      this.mediaRecorder = null;
+      this.isRecording = false;
+
+      const extension =
+        mimeType.includes('mp4')
+          ? 'm4a'
+          : mimeType.includes('ogg')
+            ? 'ogg'
+            : 'webm';
+
+      this.cdr.markForCheck();
+
+      if (!audioBlob.size) {
+
+        this.voiceErrorMessage =
+          'No audio was recorded. Please try again.';
+
+        this.cdr.markForCheck();
+        return;
+
+      }
+
+      this.transcribeAndSendVoiceAudio(
+        audioBlob,
+        `voice.${extension}`
+      );
+
+    };
+
+    recorder.onerror = () => {
+
+      this.voiceErrorMessage =
+        'A recording error occurred. Please try again.';
+
+      this.mediaStream
+        ?.getTracks()
+        .forEach(track => track.stop());
+
+      this.mediaStream = null;
+      this.mediaRecorder = null;
+      this.isRecording = false;
+
+      this.cdr.markForCheck();
+
+    };
+
+    recorder.start();
+
+    this.isRecording = true;
+
+    this.cdr.markForCheck();
+
+  } catch (error) {
+
+    console.error(
+      'Microphone access failed:',
+      error
+    );
+
+    this.voiceErrorMessage =
+      'Microphone access was denied or is unavailable. Allow microphone access and try again.';
+
+    this.mediaStream
+      ?.getTracks()
+      .forEach(track => track.stop());
+
+    this.mediaStream = null;
+    this.mediaRecorder = null;
+    this.isRecording = false;
+
+    this.cdr.markForCheck();
+
+  }
+
+}
+
+
+/**
+ * Stop the current recording.
+ * The recorder's onstop handler uploads it.
+ */
+stopVoiceRecording(): void {
+
+  if (
+    this.mediaRecorder &&
+    this.mediaRecorder.state !== 'inactive'
+  ) {
+    this.mediaRecorder.stop();
+  }
+
+}
+
+
+/**
+ * Send audio to Groq Whisper, then reuse the normal
+ * personal/group sendMessage() logic.
+ */
+private transcribeAndSendVoiceAudio(
+  audioBlob: Blob,
+  filename: string
+): void {
+
+  this.isTranscribingVoice = true;
+  this.voiceErrorMessage = '';
+
+  this.cdr.markForCheck();
+
+  this.voiceService
+    .transcribeAudio(audioBlob, filename)
+    .pipe(
+      finalize(() => {
+
+        this.isTranscribingVoice = false;
+
+        this.cdr.markForCheck();
+
+      })
+    )
+    .subscribe({
+
+      next: response => {
+
+        const transcript =
+          response.transcript?.trim() || '';
+
+        this.voiceLanguage =
+          response.language || null;
+
+        if (!transcript) {
+
+          this.voiceErrorMessage =
+            'No speech was recognized. Please try speaking again.';
+
+          this.cdr.markForCheck();
+          return;
+
+        }
+
+        console.log(
+          '🎙️ Recognized speech:',
+          transcript
+        );
+
+        // Use the same message field as typed chat.
+        this.message = transcript;
+
+        // Speak the AI reply to this voice request.
+        this.speakNextVoiceReply = true;
+
+        this.cdr.markForCheck();
+
+        // Reuses normal chat persistence, plan checks,
+        // Groq response generation and group routing.
+        this.sendMessage();
+
+      },
+
+      error: error => {
+
+        console.error(
+          'Voice transcription failed:',
+          error
+        );
+
+        this.voiceErrorMessage =
+          error.error?.message ||
+          'Unable to transcribe your recording. Please try again.';
+
+        this.speakNextVoiceReply = false;
+
+        this.cdr.markForCheck();
+
+      }
+
+    });
+
+}
+
+
+/**
+ * Speak the reply to a voice-originated question.
+ * Groq TTS is used for English; other languages use
+ * the browser's installed speech synthesis voice.
+ */
+private playAssistantAudio(text: string): void {
+
+  if (!text?.trim()) {
+    return;
+  }
+
+  this.stopAssistantAudio();
+
+  const language =
+    (this.voiceLanguage || '').toLowerCase();
+
+  if (
+    language !== 'en' &&
+    language !== 'english'
+  ) {
+
+    this.speakWithBrowser(text);
+    return;
+
+  }
+
+  this.isSpeaking = true;
+
+  this.cdr.markForCheck();
+
+  this.voiceService
+    .generateSpeech(text)
+    .pipe(
+      finalize(() => {
+        this.cdr.markForCheck();
+      })
+    )
+    .subscribe({
+
+      next: response => {
+
+        if (!response.audioChunks?.length) {
+
+          this.speakWithBrowser(text);
+          return;
+
+        }
+
+        if (response.truncated) {
+
+          console.info(
+            'Groq TTS spoke the first 1,200 characters of this reply.'
+          );
+
+        }
+
+        this.playGroqAudioChunk(
+          response.audioChunks,
+          0,
+          text
+        );
+
+      },
+
+      error: error => {
+
+        console.error(
+          'Groq speech generation failed:',
+          error
+        );
+
+        // Keep voice chat usable if TTS is unavailable.
+        this.speakWithBrowser(text);
+
+      }
+
+    });
+
+}
+
+
+/**
+ * Play Groq's WAV audio chunks one after another.
+ */
+private playGroqAudioChunk(
+  chunks: string[],
+  index: number,
+  fallbackText: string
+): void {
+
+  if (index >= chunks.length) {
+
+    this.isSpeaking = false;
+    this.cdr.markForCheck();
+
+    return;
+
+  }
+
+  try {
+
+    const binary =
+      atob(chunks[index]);
+
+    const bytes =
+      new Uint8Array(binary.length);
+
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+
+    const blob =
+      new Blob(
+        [bytes],
+        { type: 'audio/wav' }
+      );
+
+    const url =
+      URL.createObjectURL(blob);
+
+    const audio =
+      new Audio(url);
+
+    this.activeAudio = audio;
+    this.activeAudioUrl = url;
+
+    audio.onended = () => {
+
+      URL.revokeObjectURL(url);
+
+      this.activeAudio = null;
+      this.activeAudioUrl = null;
+
+      this.playGroqAudioChunk(
+        chunks,
+        index + 1,
+        fallbackText
+      );
+
+    };
+
+    audio.onerror = () => {
+
+      this.revokeActiveAudioUrl();
+
+      this.speakWithBrowser(fallbackText);
+
+    };
+
+    audio.play().catch(error => {
+
+      console.warn(
+        'Audio playback was blocked:',
+        error
+      );
+
+      this.speakWithBrowser(fallbackText);
+
+    });
+
+  } catch (error) {
+
+    console.error(
+      'Failed to play audio:',
+      error
+    );
+
+    this.speakWithBrowser(fallbackText);
+
+  }
+
+}
+
+
+/**
+ * Browser fallback for languages that do not have
+ * a configured Groq TTS model.
+ */
+private speakWithBrowser(text: string): void {
+
+  if (
+    typeof window === 'undefined' ||
+    !('speechSynthesis' in window)
+  ) {
+
+    this.isSpeaking = false;
+    this.cdr.markForCheck();
+
+    return;
+
+  }
+
+  window.speechSynthesis.cancel();
+
+  const utterance =
+    new SpeechSynthesisUtterance(text);
+
+  const language =
+    (this.voiceLanguage || '').toLowerCase();
+
+  const languageMap: Record<string, string> = {
+    english: 'en-IN',
+    en: 'en-IN',
+    tamil: 'ta-IN',
+    ta: 'ta-IN',
+    hindi: 'hi-IN',
+    hi: 'hi-IN',
+    telugu: 'te-IN',
+    te: 'te-IN',
+    kannada: 'kn-IN',
+    kn: 'kn-IN',
+    malayalam: 'ml-IN',
+    ml: 'ml-IN',
+    arabic: 'ar-SA',
+    ar: 'ar-SA'
+  };
+
+  utterance.lang =
+    languageMap[language] ||
+    navigator.language ||
+    'en-IN';
+
+  utterance.rate = 1;
+
+  utterance.onend = () => {
+
+    this.isSpeaking = false;
+    this.cdr.markForCheck();
+
+  };
+
+  utterance.onerror = () => {
+
+    this.isSpeaking = false;
+    this.cdr.markForCheck();
+
+  };
+
+  this.isSpeaking = true;
+
+  this.cdr.markForCheck();
+
+  window.speechSynthesis.speak(utterance);
+
+}
+
+
+/**
+ * Stop audio playback.
+ */
+stopAssistantAudio(): void {
+
+  if (this.activeAudio) {
+
+    this.activeAudio.onended = null;
+    this.activeAudio.onerror = null;
+
+    this.activeAudio.pause();
+    this.activeAudio.src = '';
+
+    this.activeAudio = null;
+
+  }
+
+  this.revokeActiveAudioUrl();
+
+  if (
+    typeof window !== 'undefined' &&
+    'speechSynthesis' in window
+  ) {
+
+    window.speechSynthesis.cancel();
+
+  }
+
+  this.isSpeaking = false;
+
+  this.cdr.markForCheck();
+
+}
+
+
+private revokeActiveAudioUrl(): void {
+
+  if (this.activeAudioUrl) {
+
+    URL.revokeObjectURL(
+      this.activeAudioUrl
+    );
+
+    this.activeAudioUrl = null;
+
+  }
+
+}
 
 
   // ===================================================
