@@ -76,7 +76,7 @@ export class VoiceService {
         Authorization:
           `Bearer ${token}`
 
-      });
+      }); 
 
 
     return this.http.post<VoiceTranscriptionResponse>(
