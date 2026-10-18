@@ -1,8 +1,10 @@
 import {
   Component,
   ChangeDetectorRef,
+  ElementRef,
   OnInit,
-  OnDestroy
+  OnDestroy,
+  ViewChild
 } from '@angular/core';
 
 import {
@@ -205,6 +207,18 @@ interface GroupInfo {
 export class Dashboard
   implements OnInit, OnDestroy {
 
+  // Responsive sidebar state (tablet/mobile drawer)
+  isSidebarOpen = false;
+
+  toggleSidebar(): void {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  closeSidebar(): void {
+    this.isSidebarOpen = false;
+  }
+
+
 
   // ===================================================
   // MESSAGE INPUT
@@ -347,6 +361,14 @@ isLoadingMembers =
 
   messages:
     ChatMessage[] = [];
+
+
+  // ===================================================
+  // CHAT MESSAGE SCROLL CONTAINER
+  // ===================================================
+
+  @ViewChild('messagesContainer')
+  private messagesContainer?: ElementRef<HTMLElement>;
 
 
   // ===================================================
@@ -516,6 +538,7 @@ this.groupChatService.onGroupMessage(
 
 
     this.cdr.markForCheck();
+    this.scrollMessagesToBottom();
 
   }
 );
@@ -561,6 +584,26 @@ this.groupChatService.onGroupAiResponse(
 
     });
 
+    this.scrollMessagesToBottom();
+
+    // Speak the group AI response only when this user
+    // initiated the voice question.
+    if (this.speakNextVoiceReply) {
+
+      this.speakNextVoiceReply = false;
+
+      if (data.message.content?.trim()) {
+
+        console.log('🔊 Speaking group AI reply...');
+
+        this.playAssistantAudio(
+          data.message.content
+        );
+
+      }
+
+    }
+
 
     this.isLoading =
       false;
@@ -588,6 +631,10 @@ this.groupChatService.onGroupAiResponse(
           data.message
         );
 
+
+        // Clear pending voice state if a group request fails.
+        this.speakNextVoiceReply = false;
+        this.isLoading = false;
 
         this.cdr.markForCheck();
 
@@ -1220,6 +1267,36 @@ private revokeActiveAudioUrl(): void {
   }
 
 }
+
+
+  // ===================================================
+  // SCROLL TO THE LATEST CHAT MESSAGE
+  // ===================================================
+
+  private scrollMessagesToBottom(
+    behavior: ScrollBehavior = 'smooth'
+  ): void {
+
+    // Wait until Angular has rendered the updated message list.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+
+        const container =
+          this.messagesContainer?.nativeElement;
+
+        if (!container) {
+          return;
+        }
+
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior
+        });
+
+      });
+    });
+
+  }
 
 
   // ===================================================
@@ -2518,6 +2595,7 @@ sendMessage(): void {
 
 
     this.cdr.markForCheck();
+    this.scrollMessagesToBottom();
 
 
     // ---------------------------------------------
@@ -2572,6 +2650,7 @@ sendMessage(): void {
 
 
   this.cdr.markForCheck();
+  this.scrollMessagesToBottom();
 
 
   this.chatService
@@ -2613,6 +2692,10 @@ sendMessage(): void {
           response.conversationId;
 
 
+        const assistantText =
+          response?.assistantMessage?.content || '';
+
+
         this.messages.push({
 
           _id:
@@ -2629,14 +2712,30 @@ sendMessage(): void {
             'assistant',
 
           content:
-            response
-              ?.assistantMessage
-              ?.content,
+            assistantText,
 
           feedback:
             null
 
         });
+
+        this.scrollMessagesToBottom();
+
+        // Speak the AI response only for a voice-originated
+        // question. Typed chat remains text-only.
+        if (this.speakNextVoiceReply) {
+
+          this.speakNextVoiceReply = false;
+
+          if (assistantText.trim()) {
+
+            console.log('🔊 Generating spoken AI reply...');
+
+            this.playAssistantAudio(assistantText);
+
+          }
+
+        }
 
 
         this.isLoading =
@@ -2659,6 +2758,10 @@ sendMessage(): void {
           'Chat API error:',
           error
         );
+
+
+        // Do not carry voice state into the next message if this fails.
+        this.speakNextVoiceReply = false;
 
 
         this.isLoading =
@@ -2687,6 +2790,7 @@ sendMessage(): void {
 
 
           this.cdr.markForCheck();
+          this.scrollMessagesToBottom();
 
           return;
 
@@ -2705,6 +2809,7 @@ sendMessage(): void {
 
 
         this.cdr.markForCheck();
+        this.scrollMessagesToBottom();
 
       }
 
@@ -2856,6 +2961,7 @@ openConversation(
 
 
           this.cdr.markForCheck();
+          this.scrollMessagesToBottom('auto');
 
         },
 
@@ -2901,6 +3007,7 @@ openConversation(
           false;
 
         this.cdr.markForCheck();
+        this.scrollMessagesToBottom('auto');
 
       })
 
@@ -3126,6 +3233,124 @@ newChat(): void {
       });
 
   }
+  
+/**
+ * Convert Markdown responses to clean, readable plain text
+ * for displaying in the chat UI.
+ */
+formatMessageContent(content: string): string {
+
+  if (!content) {
+    return '';
+  }
+
+  const cleanInline = (value: string): string => {
+
+    return value
+      // Images: keep the alt text
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+
+      // Links: keep the visible link text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+
+      // Inline code
+      .replace(/`([^`]+)`/g, '$1')
+
+      // Bold and italic
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/__(.*?)__/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/_(.*?)_/g, '$1')
+
+      // Strikethrough
+      .replace(/~~(.*?)~~/g, '$1')
+
+      // Headings and blockquotes
+      .replace(/^\s{0,3}#{1,6}\s+/g, '')
+      .replace(/^\s*>\s?/g, '')
+
+      // Horizontal separators
+      .replace(/^\s*[-*_]{3,}\s*$/g, '')
+
+      // Remove Markdown symbols that remain
+      .replace(/[#*`|]/g, '')
+
+      .trim();
+  };
+
+
+  const lines =
+    content.replace(/\r/g, '').split('\n');
+
+  const output: string[] = [];
+
+  let insideCodeBlock = false;
+
+  for (const line of lines) {
+
+    // Preserve code content but remove Markdown fences.
+    if (/^\s*```/.test(line)) {
+
+      insideCodeBlock = !insideCodeBlock;
+
+      continue;
+    }
+
+    if (insideCodeBlock) {
+
+      output.push(line);
+
+      continue;
+    }
+
+    // Remove Markdown table separator rows.
+    if (
+      /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/
+        .test(line)
+    ) {
+      continue;
+    }
+
+    // Convert Markdown table rows into readable lines.
+    const trimmed = line.trim();
+
+    if (
+      trimmed.startsWith('|') &&
+      trimmed.endsWith('|')
+    ) {
+
+      const cells = trimmed
+        .slice(1, -1)
+        .split('|')
+        .map(cell => cleanInline(cell))
+        .filter(Boolean);
+
+      if (cells.length) {
+        output.push(cells.join(' — '));
+      }
+
+      continue;
+    }
+
+    let cleaned = line
+      // Numbered list markers
+      .replace(/^\s*\d+[.)]\s+/, '')
+
+      // Markdown bullet markers become normal bullet points
+      .replace(/^\s*[-*+]\s+/, '• ');
+
+    cleaned = cleanInline(cleaned);
+
+    output.push(cleaned);
+  }
+
+  return output
+    .join('\n')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 
 
   // ===================================================

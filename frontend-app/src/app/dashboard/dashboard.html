@@ -1,10 +1,19 @@
-<div class="chat-container">
+<div class="chat-container" [class.sidebar-open]="isSidebarOpen">
 
   <!-- =====================================================
        SIDEBAR
        ===================================================== -->
 
   <aside class="sidebar">
+
+    <button
+      type="button"
+      class="mobile-sidebar-close"
+      aria-label="Close navigation menu"
+      (click)="closeSidebar()"
+    >
+      <span nz-icon nzType="close"></span>
+    </button>
 
     <!-- BRAND -->
 
@@ -129,7 +138,7 @@
             "
 
             (click)="
-              openConversation(conversation)
+              openConversation(conversation); closeSidebar()
             "
           >
 
@@ -474,6 +483,16 @@
        MAIN CONTENT
        ===================================================== -->
 
+  <!-- Mobile/tablet sidebar backdrop -->
+  @if (isSidebarOpen) {
+    <button
+      type="button"
+      class="sidebar-overlay"
+      aria-label="Close navigation menu"
+      (click)="closeSidebar()"
+    ></button>
+  }
+
   <main class="chat-main">
 
 
@@ -484,6 +503,15 @@
     <header class="chat-header">
 
       <div class="header-left">
+
+        <button
+          type="button"
+          class="mobile-menu-button"
+          aria-label="Open navigation menu"
+          (click)="toggleSidebar()"
+        >
+          <span nz-icon nzType="menu"></span>
+        </button>
 
         <div class="ai-status">
 
@@ -665,7 +693,7 @@
          CHAT BODY
          =================================================== -->
 
-    <section class="messages-container">
+    <section class="messages-container" #messagesContainer>
 
 
       <!-- ================================================
@@ -889,7 +917,7 @@
 
   <!-- MESSAGE TEXT -->
 
-  {{ msg.content }}
+  {{ formatMessageContent(msg.content) }}
 
 
   <!-- =================================================
@@ -1309,25 +1337,6 @@
 }
 
 
-
-
-          <!-- STOP AI SPEECH BUTTON -->
-
-          @if (isSpeaking) {
-
-            <button
-              type="button"
-              class="voice-button"
-              title="Stop spoken response"
-              (click)="stopAssistantAudio()"
-            >
-              <span
-                nz-icon
-                nzType="pause-circle"
-              ></span>
-            </button>
-
-          }
 
 
           <!-- SEND -->
