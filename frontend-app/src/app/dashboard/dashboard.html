@@ -1,4 +1,4 @@
-<div class="chat-container" [class.sidebar-open]="isSidebarOpen">
+<div class="chat-container" [class.sidebar-open]="isSidebarOpen" [class.study-theme]="workspaceMode === 'study'" [class.music-theme]="workspaceMode === 'music'">
 
   <!-- =====================================================
        SIDEBAR
@@ -62,6 +62,15 @@
     Create group
   </span>
 </button>
+
+      <div class="sidebar-workspace-links">
+        <button type="button" class="sidebar-workspace-link study-sidebar-link" (click)="selectWorkspace('study')">
+          <span nz-icon nzType="read"></span> Study
+        </button>
+        <button type="button" class="sidebar-workspace-link music-sidebar-link" (click)="selectWorkspace('music')">
+          <span nz-icon nzType="customer-service"></span> Music
+        </button>
+      </div>
 
     </div>
 
@@ -534,23 +543,24 @@
   @if (conversationId) {
 
     @if (isGroupChat) {
-
       👥 {{ getCurrentConversationTitle() }}
-
     }
-
     @else {
-
       {{ getCurrentConversationTitle() }}
-
     }
 
   }
-
+  @else if (workspaceMode === 'study') {
+    📚 Study workspace
+  }
+  @else if (workspaceMode === 'music') {
+    🎵 Music workspace
+  }
+  @else if (workspaceMode === 'home') {
+    Choose a workspace
+  }
   @else {
-
     New conversation
-
   }
 
 </span>
@@ -704,120 +714,353 @@
         messages.length === 0
       ) {
 
-        <div class="welcome">
+        <div class="welcome workspace-welcome">
 
-          <div class="welcome-glow"></div>
+          @if (workspaceMode === 'home') {
 
+            <div class="workspace-hero-icon">✦</div>
+            <span class="workspace-eyebrow">YOUR PERSONAL AI WORKSPACE</span>
+            <h1>What would you like to do today?</h1>
+            <p>Choose a space that matches what you want to focus on.</p>
 
-          <div class="welcome-icon">
+            <div class="workspace-grid">
 
-            <div class="welcome-icon-inner">
-              ✦
+              <button type="button" class="workspace-card study-workspace-card" (click)="selectWorkspace('study')">
+                <span class="workspace-card-icon"><span nz-icon nzType="read"></span></span>
+                <span class="workspace-card-copy">
+                  <strong>Study</strong>
+                  <small>Learn, plan your study time and practise with your lesson PDFs.</small>
+                  <span class="workspace-card-link">Let's study <span nz-icon nzType="arrow-right"></span></span>
+                </span>
+              </button>
+
+              <button type="button" class="workspace-card music-workspace-card" (click)="selectWorkspace('music')">
+                <span class="workspace-card-icon"><span nz-icon nzType="customer-service"></span></span>
+                <span class="workspace-card-copy">
+                  <strong>Music</strong>
+                  <small>Discover genres, explore music and get playlist ideas.</small>
+                  <span class="workspace-card-link">Explore music <span nz-icon nzType="arrow-right"></span></span>
+                </span>
+              </button>
+
+              <button type="button" class="workspace-card general-workspace-card" (click)="selectWorkspace('chat')">
+                <span class="workspace-card-icon"><span nz-icon nzType="message"></span></span>
+                <span class="workspace-card-copy">
+                  <strong>General chat</strong>
+                  <small>Ask questions, analyse PDFs and images, or brainstorm ideas.</small>
+                  <span class="workspace-card-link">Start chatting <span nz-icon nzType="arrow-right"></span></span>
+                </span>
+              </button>
+
             </div>
 
-          </div>
+          }
 
+          @else if (workspaceMode === 'study') {
 
-          <h1>
+            <div class="workspace-heading-row">
+              <button type="button" class="workspace-back-button" (click)="selectWorkspace('home')">
+                <span nz-icon nzType="arrow-left"></span> Workspaces
+              </button>
+              <span class="workspace-mode-pill study-pill"><span nz-icon nzType="read"></span> STUDY MODE</span>
+            </div>
 
-            How can I help you?
+            <!-- Animated AI teacher scene -->
+            <div class="study-teacher-stage">
+              <div class="study-class-board">
+                <span class="teacher-board-label">TODAY'S CLASS</span>
+                <strong class="teacher-board-title">Learn something new</strong>
+                <div class="teacher-board-writing">
+                  <span class="chalk-word chalk-one">Learn</span>
+                  <span class="chalk-plus">+</span>
+                  <span class="chalk-word chalk-two">Practice</span>
+                  <span class="chalk-equals">=</span>
+                  <span class="chalk-word chalk-three">Grow</span>
+                </div>
+                <div class="teacher-board-stars" aria-hidden="true">✦ &nbsp; ✧ &nbsp; ✦</div>
+              </div>
 
-          </h1>
+              <div class="study-teacher-character" aria-label="Animated AI teacher">
+                <div class="teacher-speech-bubble">
+                  <span>{{ currentStudyTeacherTip }}</span>
+                </div>
+                <div class="teacher-person">
+                  <span class="teacher-person-emoji">👩‍🏫</span>
+                  <span class="teacher-waving-hand" aria-hidden="true">✋</span>
+                </div>
+                <span class="teacher-caption">YOUR AI TEACHER</span>
+              </div>
+            </div>
 
+            <div class="study-teacher-actions">
+              <button type="button" class="teacher-tip-button" (click)="nextStudyTeacherTip()">
+                <span nz-icon nzType="bulb"></span> Next teaching tip
+              </button>
+              <button type="button" class="teacher-start-button" (click)="startTeacherLesson()">
+                <span nz-icon nzType="read"></span> Teach me a lesson
+              </button>
+            </div>
 
-          <p>
+            <div class="workspace-hero-icon study-hero-icon"><span nz-icon nzType="read"></span></div>
+            <span class="workspace-eyebrow study-eyebrow">YOUR PERSONAL STUDY COMPANION</span>
+            <h1>Let's study! 📚</h1>
+            <p>Make a plan, stay focused, and turn your class notes into practice questions.</p>
 
-            Ask a question, upload a PDF,
-            or attach an image to get started.
+            <div class="study-tools-grid">
 
-          </p>
+              <button type="button" class="study-tool-card" (click)="openStudyTool('todo')">
+                <span class="study-tool-icon todo-icon"><span nz-icon nzType="check-square"></span></span>
+                <strong>My To-do List</strong>
+                <small>Organise assignments and daily study goals.</small>
+                <span class="study-tool-action">Manage tasks <span nz-icon nzType="arrow-right"></span></span>
+              </button>
 
+              <button type="button" class="study-tool-card" (click)="openStudyTool('pomodoro')">
+                <span class="study-tool-icon timer-icon"><span nz-icon nzType="clock-circle"></span></span>
+                <strong>Pomodoro Timer</strong>
+                <small>Use focused 25-minute sessions and 5-minute breaks.</small>
+                <span class="study-tool-action">Start focus <span nz-icon nzType="arrow-right"></span></span>
+              </button>
 
-          <!-- SUGGESTIONS -->
+              <button type="button" class="study-tool-card" (click)="openStudyTool('mock-test')">
+                <span class="study-tool-icon test-icon"><span nz-icon nzType="file-pdf"></span></span>
+                <strong>Mock Test from PDF</strong>
+                <small>Generate multiple-choice questions from your class lesson.</small>
+                <span class="study-tool-action">Create a test <span nz-icon nzType="arrow-right"></span></span>
+              </button>
 
-          <div class="suggestions">
+              <button type="button" class="study-tool-card" (click)="openStudyTool('explain')">
+                <span class="study-tool-icon explain-icon"><span nz-icon nzType="bulb"></span></span>
+                <strong>Explain a Lesson</strong>
+                <small>Upload notes and get a step-by-step explanation.</small>
+                <span class="study-tool-action">Learn a topic <span nz-icon nzType="arrow-right"></span></span>
+              </button>
 
-            <button
-              class="suggestion-card"
-              (click)="message = 'Explain something about important basic legal indian laws'"
-            >
+              <button
+                type="button"
+                class="study-tool-card code-lab-card"
+                [class.code-lab-locked]="!isPro"
+                [attr.aria-label]="isPro ? 'Open Code Playground' : 'Upgrade to Pro to unlock Code Playground'"
+                (click)="openStudyTool('code-editor')"
+              >
+                <span class="study-tool-icon code-icon"><span nz-icon nzType="code"></span></span>
+                <strong>Code Playground</strong>
+                @if (isPro) {
+                  <small>Write JavaScript, run it safely and practise coding.</small>
+                  <span class="study-tool-action">Open code lab <span nz-icon nzType="arrow-right"></span></span>
+                } @else {
+                  <span class="code-lab-pro-label"><span nz-icon nzType="crown"></span> PRO FEATURE</span>
+                  <small>Upgrade to Pro to unlock the interactive coding workspace.</small>
+                  <span class="study-tool-action">Upgrade to Pro <span nz-icon nzType="arrow-right"></span></span>
+                }
+              </button>
 
-              <span class="suggestion-icon blue">
+            </div>
 
-                <span
-                  nz-icon
-                  nzType="bulb"
-                ></span>
+            @if (activeStudyTool === 'todo') {
+              <div id="active-study-tool-panel" class="study-tool-panel">
+                <div class="study-panel-header">
+                  <div><span class="study-panel-kicker">STAY ORGANISED</span><h2>My study tasks</h2><p>{{ completedStudyTodos }} of {{ studyTodos.length }} completed</p></div>
+                  <button type="button" class="study-panel-close" (click)="closeStudyTool()" aria-label="Close tasks"><span nz-icon nzType="close"></span></button>
+                </div>
+                <div class="todo-progress-track"><span [style.width.%]="studyTodoProgress"></span></div>
+                <div class="todo-entry-row">
+                  <input type="text" [(ngModel)]="newTodoTitle" placeholder="Add an assignment or study task..." maxlength="140" (keyup.enter)="addStudyTodo()" />
+                  <button type="button" class="study-primary-button" (click)="addStudyTodo()" [disabled]="!newTodoTitle.trim()"><span nz-icon nzType="plus"></span> Add</button>
+                </div>
+                @if (studyTodos.length === 0) {
+                  <div class="study-empty-state"><span nz-icon nzType="file-done"></span><strong>No tasks yet</strong><small>Add your first study task above.</small></div>
+                } @else {
+                  <div class="todo-list">
+                    @for (todo of studyTodos; track todo.id) {
+                      <div class="todo-item" [class.todo-completed]="todo.completed">
+                        <label><input type="checkbox" [checked]="todo.completed" (change)="toggleStudyTodo(todo.id)" /><span>{{ todo.title }}</span></label>
+                        <button type="button" class="todo-delete-button" title="Delete task" (click)="deleteStudyTodo(todo.id)"><span nz-icon nzType="delete"></span></button>
+                      </div>
+                    }
+                  </div>
+                  @if (completedStudyTodos > 0) {
+                    <button type="button" class="clear-completed-button" (click)="clearCompletedStudyTodos()">Clear completed tasks</button>
+                  }
+                }
+              </div>
+            }
 
-              </span>
+            @if (activeStudyTool === 'pomodoro') {
+              <div id="active-study-tool-panel" class="study-tool-panel pomodoro-panel">
+                <div class="study-panel-header">
+                  <div><span class="study-panel-kicker">FOCUS SESSION</span><h2>Pomodoro timer</h2><p>{{ pomodoroMessage }}</p></div>
+                  <button type="button" class="study-panel-close" (click)="closeStudyTool()" aria-label="Close timer"><span nz-icon nzType="close"></span></button>
+                </div>
+                <div class="pomodoro-mode-switch">
+                  <button type="button" [class.active]="pomodoroMode === 'focus'" (click)="setPomodoroMode('focus')">Focus · 25 min</button>
+                  <button type="button" [class.active]="pomodoroMode === 'break'" (click)="setPomodoroMode('break')">Break · 5 min</button>
+                </div>
+                <div class="pomodoro-clock" [class.break-clock]="pomodoroMode === 'break'">{{ pomodoroTimeDisplay }}</div>
+                <div class="pomodoro-progress-track"><span [style.width.%]="pomodoroProgressPercent"></span></div>
+                <div class="pomodoro-controls">
+                  @if (pomodoroIsRunning) {
+                    <button type="button" class="study-primary-button" (click)="pausePomodoro()"><span nz-icon nzType="pause"></span> Pause</button>
+                  } @else {
+                    <button type="button" class="study-primary-button" (click)="startPomodoro()"><span nz-icon nzType="play"></span> Start</button>
+                  }
+                  <button type="button" class="study-secondary-button" (click)="resetPomodoro()"><span nz-icon nzType="reload"></span> Reset</button>
+                </div>
+                <small class="pomodoro-session-count">Completed focus sessions: {{ pomodoroCompletedSessions }}</small>
+              </div>
+            }
 
-              <span class="suggestion-text">
+            @if (activeStudyTool === 'mock-test' || activeStudyTool === 'explain') {
+              <div id="active-study-tool-panel" class="study-tool-panel pdf-study-panel">
+                <div class="study-panel-header">
+                  <div>
+                    <span class="study-panel-kicker">LESSON PDF</span>
+                    <h2>{{ activeStudyTool === 'mock-test' ? 'Create a mock test' : 'Explain my lesson' }}</h2>
+                    <p>{{ activeStudyTool === 'mock-test' ? 'Upload your class PDF and generate a 10-question practice test.' : 'Upload your class PDF and ask the AI to teach it step by step.' }}</p>
+                  </div>
+                  <button type="button" class="study-panel-close" (click)="closeStudyTool()" aria-label="Close PDF tool"><span nz-icon nzType="close"></span></button>
+                </div>
+                <input #studyPdfInput type="file" accept="application/pdf,.pdf" hidden (change)="selectStudyPdf($event)" />
+                <button type="button" class="study-upload-zone" (click)="openStudyPdfPicker(activeStudyTool === 'mock-test' ? 'mock-test' : 'explain', studyPdfInput)">
+                  <span class="study-upload-icon"><span nz-icon nzType="file-pdf"></span></span>
+                  <strong>{{ selectedFile ? selectedFile.name : 'Choose your lesson PDF' }}</strong>
+                  <small>{{ selectedFile ? 'PDF selected — ready to continue' : 'Select a PDF from your device' }}</small>
+                  <span class="study-upload-link">Browse files</span>
+                </button>
+                @if (studyToolNotice) { <p class="study-tool-notice">{{ studyToolNotice }}</p> }
+                <div class="study-pdf-actions">
+                  <button type="button" class="study-secondary-button" (click)="closeStudyTool()">Cancel</button>
+                  <button type="button" class="study-primary-button" [disabled]="!selectedFile || isLoading" (click)="runStudyPdfAction()">{{ activeStudyTool === 'mock-test' ? 'Generate mock test' : 'Explain lesson' }} <span nz-icon nzType="arrow-right"></span></button>
+                </div>
+                <small class="study-pdf-note">The AI will use the uploaded PDF as the source for its response.</small>
+              </div>
+            }
 
-                Explain something about important basic legal indian laws
+            @if (activeStudyTool === 'code-editor' && isPro) {
+              <div id="active-study-tool-panel" class="study-tool-panel code-editor-panel">
+                <div class="study-panel-header">
+                  <div>
+                    <span class="study-panel-kicker">PRACTISE BY DOING</span>
+                    <h2>JavaScript Code Playground</h2>
+                    <p>Write JavaScript, run it and see the console output. Press Tab inside the editor to indent.</p>
+                  </div>
+                  <button type="button" class="study-panel-close" (click)="closeStudyTool()" aria-label="Close code editor">
+                    <span nz-icon nzType="close"></span>
+                  </button>
+                </div>
 
-              </span>
+                <div class="code-editor-window">
+                  <div class="code-editor-titlebar">
+                    <div class="code-window-dots" aria-hidden="true">
+                      <span></span><span></span><span></span>
+                    </div>
+                    <span class="code-editor-filename">study-practice.js</span>
+                    <span class="code-language-badge">JavaScript</span>
+                  </div>
 
-              <span class="suggestion-arrow">
-                →
-              </span>
+                  <div class="code-editor-body">
+                    <div class="code-line-gutter" aria-hidden="true">
+                      @for (line of codeEditorLineNumbers; track line) {
+                        <span>{{ line }}</span>
+                      }
+                    </div>
+                    <textarea
+                      class="code-editor-textarea"
+                      [(ngModel)]="codeEditorCode"
+                      (keydown)="onCodeEditorKeydown($event)"
+                      spellcheck="false"
+                      autocomplete="off"
+                      autocapitalize="off"
+                      wrap="off"
+                      aria-label="JavaScript code editor"
+                      placeholder="// Write your JavaScript here..."
+                    ></textarea>
+                  </div>
+                </div>
 
-            </button>
+                <div class="code-editor-toolbar">
+                  <div class="code-editor-status" [class.status-running]="codeEditorStatus === 'running'" [class.status-error]="codeEditorStatus === 'error'" [class.status-success]="codeEditorStatus === 'success'">
+                    <span class="code-status-dot"></span>
+                    @if (codeEditorStatus === 'running') { Running }
+                    @else if (codeEditorStatus === 'success') { Finished }
+                    @else if (codeEditorStatus === 'error') { Error }
+                    @else { Ready }
+                  </div>
 
+                  <div class="code-editor-actions">
+                    <button type="button" class="code-action-button" (click)="resetCodeEditor()">
+                      <span nz-icon nzType="reload"></span> Reset
+                    </button>
+                    <button type="button" class="code-action-button" (click)="copyStudyCode()">
+                      <span nz-icon nzType="copy"></span> Copy
+                    </button>
+                    <button type="button" class="code-run-button" (click)="runCodeEditor()" [disabled]="codeEditorStatus === 'running'">
+                      <span nz-icon nzType="play"></span> Run code
+                    </button>
+                  </div>
+                </div>
 
-            <button
-              class="suggestion-card"
-              (click)="message = 'Summarize this document.'"
-            >
+                <div class="code-output-panel">
+                  <div class="code-output-heading">
+                    <span nz-icon nzType="code"></span>
+                    Console output
+                  </div>
+                  <pre>{{ codeEditorOutput }}</pre>
+                </div>
 
-              <span class="suggestion-icon purple">
+                <iframe
+                  #codePreviewFrame
+                  class="code-editor-sandbox"
+                  sandbox="allow-scripts"
+                  title="Isolated JavaScript code runner"
+                  aria-hidden="true"
+                ></iframe>
 
-                <span
-                  nz-icon
-                  nzType="file-text"
-                ></span>
+                @if (studyToolNotice) {
+                  <p class="study-tool-notice">{{ studyToolNotice }}</p>
+                }
 
-              </span>
+                <div class="code-editor-footer">
+                  <span><span nz-icon nzType="safety-certificate"></span> Code runs in an isolated browser sandbox.</span>
+                  <button type="button" class="study-secondary-button" (click)="askAiToExplainCode()">
+                    <span nz-icon nzType="bulb"></span> Explain this code with AI
+                  </button>
+                </div>
+                <small class="study-pdf-note">Currently supports JavaScript execution in the browser. Python and Java execution are not enabled in this version.</small>
+              </div>
+            }
 
-              <span class="suggestion-text">
+          }
 
-                Summarize a document
+          @else if (workspaceMode === 'music') {
 
-              </span>
+            <div class="workspace-heading-row">
+              <button type="button" class="workspace-back-button" (click)="selectWorkspace('home')"><span nz-icon nzType="arrow-left"></span> Workspaces</button>
+              <span class="workspace-mode-pill music-pill"><span nz-icon nzType="customer-service"></span> MUSIC MODE</span>
+            </div>
+            <div class="workspace-hero-icon music-hero-icon"><span nz-icon nzType="customer-service"></span></div>
+            <span class="workspace-eyebrow music-eyebrow">YOUR MUSIC DISCOVERY ASSISTANT</span>
+            <h1>Let's explore music! 🎵</h1>
+            <p>Find music for your mood, discover new genres, and get playlist ideas.</p>
+            <div class="music-prompt-grid">
+              <button type="button" class="music-prompt-card" (click)="askMusicPrompt('Suggest a English playlist for a calm evening. Give song titles and artists, with a short reason for each suggestion.')"><span nz-icon nzType="cloud"></span><strong>Relax and unwind</strong><small>Find music for a peaceful evening.</small></button>
+              <button type="button" class="music-prompt-card" (click)="askMusicPrompt('Recommend an energetic playlist for a workout. Include a mix of English and international music, with artists.')"><span nz-icon nzType="fire"></span><strong>Workout energy</strong><small>Get upbeat music recommendations.</small></button>
+              <button type="button" class="music-prompt-card" (click)="askMusicPrompt('Recommend instrumental and ambient music for deep focus and studying. Explain the mood of each recommendation.')"><span nz-icon nzType="coffee"></span><strong>Deep focus</strong><small>Discover music to concentrate.</small></button>
+              <button type="button" class="music-prompt-card" (click)="askMusicPrompt('Introduce me to a music genre I may not know. Explain its origins, typical instruments and a few artists to explore.')"><span nz-icon nzType="compass"></span><strong>Discover a genre</strong><small>Explore a new sound or style.</small></button>
+            </div>
+            <p class="music-note">Music mode provides recommendations and discovery through AI chat; it does not stream or play copyrighted tracks.</p>
 
-              <span class="suggestion-arrow">
-                →
-              </span>
+          }
 
-            </button>
+          @else {
 
+            <div class="workspace-hero-icon"><span nz-icon nzType="message"></span></div>
+            <span class="workspace-eyebrow">GENERAL AI ASSISTANT</span>
+            <h1>How can I help you?</h1>
+            <p>Ask a question, upload a PDF, attach an image, or explore another workspace.</p>
+            <button type="button" class="workspace-back-button general-back-button" (click)="selectWorkspace('home')"><span nz-icon nzType="appstore"></span> Explore workspaces</button>
 
-            <button
-              class="suggestion-card"
-              (click)="message = 'Analyze this image for me.'"
-            >
-
-              <span class="suggestion-icon orange">
-
-                <span
-                  nz-icon
-                  nzType="picture"
-                ></span>
-
-              </span>
-
-              <span class="suggestion-text">
-
-                Analyze an image
-
-              </span>
-
-              <span class="suggestion-arrow">
-                →
-              </span>
-
-            </button>
-
-          </div>
+          }
 
         </div>
 
@@ -1273,7 +1516,7 @@
           <textarea
             nz-input
             [(ngModel)]="message"
-            placeholder="Message AI..."
+            [placeholder]="workspaceMode === 'study' ? 'Ask your study assistant...' : workspaceMode === 'music' ? 'Ask your music assistant...' : 'Message AI...'"
             rows="1"
             (keyup.enter)="sendMessage()"
           ></textarea>

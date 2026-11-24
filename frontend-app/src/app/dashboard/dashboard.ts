@@ -170,6 +170,22 @@ interface GroupInfo {
 
 
 // =====================================================
+// STUDY TODO
+// =====================================================
+
+interface StudyTodo {
+  id: string;
+  title: string;
+  completed: boolean;
+  createdAt: string;
+}
+
+type WorkspaceMode = 'home' | 'chat' | 'study' | 'music';
+type StudyTool = 'todo' | 'pomodoro' | 'mock-test' | 'explain' | 'code-editor';
+type StudyPdfAction = 'mock-test' | 'explain';
+
+
+// =====================================================
 // DASHBOARD
 // =====================================================
 
@@ -207,7 +223,11 @@ interface GroupInfo {
 export class Dashboard
   implements OnInit, OnDestroy {
 
-  // Responsive sidebar state (tablet/mobile drawer)
+
+  // ===================================================
+  // RESPONSIVE SIDEBAR
+  // ===================================================
+
   isSidebarOpen = false;
 
   toggleSidebar(): void {
@@ -218,6 +238,92 @@ export class Dashboard
     this.isSidebarOpen = false;
   }
 
+
+  // ===================================================
+  // WORKSPACE MODE
+  // ===================================================
+
+  workspaceMode: WorkspaceMode = 'home';
+
+  activeStudyTool: StudyTool | null = null;
+
+  newTodoTitle = '';
+
+  studyTodos: StudyTodo[] = [];
+
+  studyToolNotice = '';
+
+  pendingStudyPdfAction: StudyPdfAction = 'mock-test';
+
+  // ===================================================
+  // ANIMATED STUDY TEACHER
+  // ===================================================
+
+  studyTeacherTips = [
+    'Welcome to class! Small steps every day lead to big progress.',
+    'Try to understand the idea first. Memorising becomes easier after that.',
+    'Take a short break, stretch, and come back with a fresh mind.',
+    'Practice is how you turn what you learn into something you remember.',
+    'Ask questions whenever something feels unclear. Curiosity is a strength.'
+  ];
+
+  studyTeacherTipIndex = 0;
+
+  get currentStudyTeacherTip(): string {
+    return this.studyTeacherTips[
+      this.studyTeacherTipIndex % this.studyTeacherTips.length
+    ];
+  }
+
+  nextStudyTeacherTip(): void {
+    this.studyTeacherTipIndex =
+      (this.studyTeacherTipIndex + 1) % this.studyTeacherTips.length;
+  }
+
+  startTeacherLesson(): void {
+    this.openStudyTool('explain');
+  }
+
+
+  // ===================================================
+  // JAVASCRIPT CODE PLAYGROUND
+  // ===================================================
+
+  codeEditorCode = `// Welcome to your Study Code Lab!
+function greet(name) {
+  return \`Hello, \${name}! Keep learning.\`;
+}
+
+console.log(greet('Student'));
+
+const marks = [85, 92, 78];
+const average = marks.reduce((total, mark) => total + mark, 0) / marks.length;
+
+console.log('Average marks:', average);`;
+
+  codeEditorOutput = 'Run your JavaScript to see the console output here.';
+
+  codeEditorStatus: 'idle' | 'running' | 'success' | 'error' = 'idle';
+
+  private codeEditorRunToken = 0;
+
+
+
+  // ===================================================
+  // POMODORO TIMER
+  // ===================================================
+
+  pomodoroMode: 'focus' | 'break' = 'focus';
+
+  pomodoroSecondsRemaining = 25 * 60;
+
+  pomodoroIsRunning = false;
+
+  pomodoroCompletedSessions = 0;
+
+  pomodoroMessage = 'Ready for a focused study session?';
+
+  private pomodoroInterval: ReturnType<typeof setInterval> | null = null;
 
 
   // ===================================================
@@ -370,6 +476,37 @@ isLoadingMembers =
   @ViewChild('messagesContainer')
   private messagesContainer?: ElementRef<HTMLElement>;
 
+  @ViewChild('codePreviewFrame')
+  private codePreviewFrame?: ElementRef<HTMLIFrameElement>;
+
+  private readonly codeEditorMessageHandler = (event: MessageEvent): void => {
+    const frame = this.codePreviewFrame?.nativeElement;
+    const data = event.data;
+
+    // Accept messages only from this sandboxed code-runner iframe.
+    if (
+      !frame ||
+      event.source !== frame.contentWindow ||
+      data?.type !== 'study-code-output' ||
+      data?.token !== this.codeEditorRunToken
+    ) {
+      return;
+    }
+
+    this.codeEditorStatus = data.error ? 'error' : 'success';
+
+    if (data.error) {
+      this.codeEditorOutput = String(data.error);
+    } else {
+      const lines = Array.isArray(data.lines) ? data.lines : [];
+      this.codeEditorOutput = lines.length
+        ? lines.join('\n')
+        : 'Code executed successfully. No console output.';
+    }
+
+    this.cdr.markForCheck();
+  };
+
 
   // ===================================================
   // USER
@@ -468,7 +605,16 @@ private activeAudioUrl: string | null = null;
 
     this.loadUser();
 
+    this.loadStudyTodos();
+
     this.loadConversations();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener(
+        'message',
+        this.codeEditorMessageHandler
+      );
+    }
 
 
     // =================================================
@@ -677,6 +823,17 @@ this.groupChatService.onGroupAiResponse(
   // ===================================================
 
   ngOnDestroy(): void {
+
+    this.clearPomodoroInterval();
+
+    this.codeEditorRunToken += 1;
+
+    if (typeof window !== 'undefined') {
+      window.removeEventListener(
+        'message',
+        this.codeEditorMessageHandler
+      );
+    }
 
     this.groupChatService.disconnect();
     // Stop recording safely when leaving the dashboard.
@@ -1268,6 +1425,640 @@ private revokeActiveAudioUrl(): void {
 
 }
 
+
+  // ===================================================
+  // WORKSPACE NAVIGATION
+  // ===================================================
+
+  selectWorkspace(mode: WorkspaceMode): void {
+
+    if (this.isGroupChat && this.conversationId) {
+      this.groupChatService.leaveGroup(this.conversationId);
+    }
+
+    this.workspaceMode = mode;
+    this.conversationId = undefined;
+    this.isGroupChat = false;
+    this.messages = [];
+    this.message = '';
+    this.selectedFile = null;
+    this.activeStudyTool = null;
+    this.studyToolNotice = '';
+    this.speakNextVoiceReply = false;
+    this.isLoading = false;
+    this.closeSidebar();
+
+    if (mode === 'study') {
+      this.loadStudyTodos();
+    }
+
+    this.cdr.markForCheck();
+    this.scrollMessagesToBottom('auto');
+  }
+
+
+  // ===================================================
+  // STUDY TODO LIST (SAVED PER USER IN THIS BROWSER)
+  // ===================================================
+
+  private getStudyTodoStorageKey(): string {
+    return `ai-chat-study-todos-${this.user?.id || 'guest'}`;
+  }
+
+  loadStudyTodos(): void {
+    try {
+      const saved = localStorage.getItem(this.getStudyTodoStorageKey());
+      this.studyTodos = saved ? JSON.parse(saved) as StudyTodo[] : [];
+      if (!Array.isArray(this.studyTodos)) {
+        this.studyTodos = [];
+      }
+    } catch (error) {
+      console.error('Failed to load study tasks:', error);
+      this.studyTodos = [];
+    }
+  }
+
+  private saveStudyTodos(): void {
+    try {
+      localStorage.setItem(
+        this.getStudyTodoStorageKey(),
+        JSON.stringify(this.studyTodos)
+      );
+    } catch (error) {
+      console.error('Failed to save study tasks:', error);
+      this.studyToolNotice = 'Could not save tasks in this browser.';
+    }
+  }
+
+  addStudyTodo(): void {
+    const title = this.newTodoTitle.trim();
+    if (!title) {
+      return;
+    }
+
+    this.studyTodos = [
+      {
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        title,
+        completed: false,
+        createdAt: new Date().toISOString()
+      },
+      ...this.studyTodos
+    ];
+
+    this.newTodoTitle = '';
+    this.saveStudyTodos();
+    this.cdr.markForCheck();
+  }
+
+  toggleStudyTodo(todoId: string): void {
+    this.studyTodos = this.studyTodos.map(todo =>
+      todo.id === todoId
+        ? { ...todo, completed: !todo.completed }
+        : todo
+    );
+    this.saveStudyTodos();
+  }
+
+  deleteStudyTodo(todoId: string): void {
+    this.studyTodos = this.studyTodos.filter(todo => todo.id !== todoId);
+    this.saveStudyTodos();
+  }
+
+  clearCompletedStudyTodos(): void {
+    this.studyTodos = this.studyTodos.filter(todo => !todo.completed);
+    this.saveStudyTodos();
+  }
+
+  get completedStudyTodos(): number {
+    return this.studyTodos.filter(todo => todo.completed).length;
+  }
+
+  get studyTodoProgress(): number {
+    return this.studyTodos.length
+      ? Math.round((this.completedStudyTodos / this.studyTodos.length) * 100)
+      : 0;
+  }
+
+
+  // ===================================================
+  // STUDY TOOL PANELS
+  // ===================================================
+
+  openStudyTool(tool: StudyTool): void {
+    // Code Playground is a Pro-only Study feature.
+    // The editor runs locally in the browser, so this is an
+    // application UI entitlement check (not a server execution API).
+    if (tool === 'code-editor' && !this.isPro) {
+      this.activeStudyTool = null;
+      this.studyToolNotice = 'Code Playground is available on the Pro plan.';
+      this.cdr.markForCheck();
+      this.upgradeToPro();
+      return;
+    }
+
+    this.activeStudyTool = tool;
+    this.studyToolNotice = '';
+
+    if (tool === 'mock-test' || tool === 'explain') {
+      this.pendingStudyPdfAction = tool;
+    }
+
+    this.cdr.detectChanges();
+    this.scrollStudyToolIntoView();
+  }
+
+  /** Smoothly bring the selected Study tool panel into view. */
+  private scrollStudyToolIntoView(): void {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const container = this.messagesContainer?.nativeElement;
+        const panel = document.getElementById('active-study-tool-panel');
+
+        if (!container || !panel) {
+          panel?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+          return;
+        }
+
+        const containerRect = container.getBoundingClientRect();
+        const panelRect = panel.getBoundingClientRect();
+        const targetTop =
+          container.scrollTop +
+          panelRect.top -
+          containerRect.top -
+          20;
+
+        container.scrollTo({
+          top: Math.max(0, targetTop),
+          behavior: 'smooth'
+        });
+      });
+    });
+  }
+
+  closeStudyTool(): void {
+    this.activeStudyTool = null;
+    this.studyToolNotice = '';
+    this.cdr.markForCheck();
+  }
+
+
+  // ===================================================
+  // CODE EDITOR
+  // ===================================================
+
+  get codeEditorLineNumbers(): number[] {
+    const count = Math.max(1, this.codeEditorCode.split('\\n').length);
+    return Array.from({ length: count }, (_, index) => index + 1);
+  }
+
+  onCodeEditorKeydown(event: KeyboardEvent): void {
+    if (!this.isPro) {
+      event.preventDefault();
+      this.upgradeToPro();
+      return;
+    }
+
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    const textarea = event.target as HTMLTextAreaElement;
+    if (!textarea) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    this.codeEditorCode =
+      this.codeEditorCode.slice(0, start) +
+      '  ' +
+      this.codeEditorCode.slice(end);
+
+    this.cdr.detectChanges();
+
+    requestAnimationFrame(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + 2, start + 2);
+    });
+  }
+
+  runCodeEditor(): void {
+    if (!this.isPro) {
+      this.upgradeToPro();
+      return;
+    }
+
+    const frame = this.codePreviewFrame?.nativeElement;
+
+    if (!frame) {
+      this.codeEditorStatus = 'error';
+      this.codeEditorOutput =
+        'The code runner is not ready. Close and reopen the Code Lab, then try again.';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    const token = ++this.codeEditorRunToken;
+    const safeSource = JSON.stringify(this.codeEditorCode)
+      .replace(/</g, '\\u003c')
+      .replace(/\\u2028/g, '\\\\u2028')
+      .replace(/\\u2029/g, '\\\\u2029');
+
+    this.codeEditorStatus = 'running';
+    this.codeEditorOutput = 'Running JavaScript...';
+    this.cdr.markForCheck();
+
+    // JavaScript runs in a separate-origin sandboxed iframe.
+    // CSP blocks network connections and external resources.
+    frame.srcdoc = `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval'; style-src 'unsafe-inline'; connect-src 'none'; img-src data:; object-src 'none'; base-uri 'none'; form-action 'none';">
+</head>
+<body>
+<script>
+(() => {
+  const runToken = ${token};
+  const source = ${safeSource};
+  const lines = [];
+
+  const printable = (value) => {
+    if (typeof value === 'string') return value;
+    if (typeof value === 'undefined') return 'undefined';
+    try {
+      const json = JSON.stringify(value);
+      return typeof json === 'string' ? json : String(value);
+    } catch (_) {
+      return String(value);
+    }
+  };
+
+  const capture = (...values) => {
+    lines.push(values.map(printable).join(' '));
+  };
+
+  const sandboxConsole = {
+    log: capture,
+    info: capture,
+    debug: capture,
+    warn: (...values) => capture('Warning:', ...values),
+    error: (...values) => capture('Error:', ...values)
+  };
+
+  const sendResult = (error) => {
+    parent.postMessage({
+      type: 'study-code-output',
+      token: runToken,
+      lines,
+      error: error || null
+    }, '*');
+  };
+
+  try {
+    const runner = new Function(
+      'console',
+      '"use strict";\\n' + source
+    );
+
+    const result = runner(sandboxConsole);
+
+    Promise.resolve(result)
+      .then(() => sendResult(null))
+      .catch(error => sendResult(
+        error && (error.stack || error.message)
+          ? (error.stack || error.message)
+          : String(error)
+      ));
+
+  } catch (error) {
+    sendResult(
+      error && (error.stack || error.message)
+        ? (error.stack || error.message)
+        : String(error)
+    );
+  }
+})();
+</script>
+</body>
+</html>`;
+
+  }
+
+  resetCodeEditor(): void {
+    if (!this.isPro) {
+      this.upgradeToPro();
+      return;
+    }
+
+    this.codeEditorCode = `// Welcome to your Study Code Lab!
+function greet(name) {
+  return \`Hello, \${name}! Keep learning.\`;
+}
+
+console.log(greet('Student'));
+
+const marks = [85, 92, 78];
+const average = marks.reduce((total, mark) => total + mark, 0) / marks.length;
+
+console.log('Average marks:', average);`;
+
+    this.codeEditorOutput =
+      'Run your JavaScript to see the console output here.';
+
+    this.codeEditorStatus = 'idle';
+  }
+
+  async copyStudyCode(): Promise<void> {
+    if (!this.isPro) {
+      this.upgradeToPro();
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(this.codeEditorCode);
+      this.studyToolNotice = 'Code copied to clipboard.';
+    } catch (error) {
+      console.error('Could not copy code:', error);
+      this.studyToolNotice =
+        'Clipboard access is unavailable in this browser.';
+    }
+
+    this.cdr.markForCheck();
+  }
+
+  askAiToExplainCode(): void {
+    if (!this.isPro) {
+      this.upgradeToPro();
+      return;
+    }
+
+    const code = this.codeEditorCode.trim();
+
+    if (!code) {
+      this.studyToolNotice = 'Write some code first.';
+      return;
+    }
+
+    this.message =
+      'Teach me this JavaScript code step by step in beginner-friendly language. Explain what each section does, identify any mistakes, and show a small example of how it runs.\\n\\n```javascript\\n' +
+      code +
+      '\\n```';
+
+    this.selectedFile = null;
+    this.activeStudyTool = null;
+    this.workspaceMode = 'study';
+    this.studyToolNotice = '';
+    this.sendMessage();
+  }
+
+  openStudyPdfPicker(
+    action: StudyPdfAction,
+    input: HTMLInputElement
+  ): void {
+    this.pendingStudyPdfAction = action;
+    input.value = '';
+    input.click();
+  }
+
+  selectStudyPdf(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const isPdf =
+      file.type === 'application/pdf' ||
+      file.name.toLowerCase().endsWith('.pdf');
+
+    if (!isPdf) {
+      this.studyToolNotice = 'Please choose a PDF lesson file.';
+      this.selectedFile = null;
+      input.value = '';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.selectedFile = file;
+    this.studyToolNotice = `${file.name} is ready.`;
+    this.cdr.markForCheck();
+  }
+
+  runStudyPdfAction(): void {
+    if (!this.selectedFile) {
+      this.studyToolNotice = 'Choose your lesson PDF first.';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    if (this.isGroupChat) {
+      this.studyToolNotice = 'Start a personal study chat to upload a lesson PDF.';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    if (this.pendingStudyPdfAction === 'mock-test') {
+      this.message =
+        'Create a 10-question multiple-choice mock test based ONLY on the attached lesson PDF. Give four options (A, B, C and D) for each question. Put the answer key in a separate section at the end, with a short explanation for each correct answer. Do not add facts that are not present in the PDF.';
+    } else {
+      this.message =
+        'Teach me the attached lesson PDF step by step in simple language. Explain the important concepts, define key terms, give examples based only on the PDF, and finish with a short revision summary and five practice questions.';
+    }
+
+    this.activeStudyTool = null;
+    this.studyToolNotice = '';
+    this.workspaceMode = 'study';
+    this.sendMessage();
+  }
+
+
+  // ===================================================
+  // POMODORO TIMER
+  // ===================================================
+
+  get pomodoroTimeDisplay(): string {
+    const minutes = Math.floor(this.pomodoroSecondsRemaining / 60);
+    const seconds = this.pomodoroSecondsRemaining % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+
+  get pomodoroProgressPercent(): number {
+    const total = this.pomodoroMode === 'focus' ? 25 * 60 : 5 * 60;
+    return Math.max(0, Math.min(100,
+      ((total - this.pomodoroSecondsRemaining) / total) * 100
+    ));
+  }
+
+  setPomodoroMode(mode: 'focus' | 'break'): void {
+    this.pausePomodoro();
+    this.pomodoroMode = mode;
+    this.pomodoroSecondsRemaining = mode === 'focus' ? 25 * 60 : 5 * 60;
+    this.pomodoroMessage = mode === 'focus'
+      ? 'Focus time. One task at a time.'
+      : 'Take a short break and recharge.';
+  }
+
+  startPomodoro(): void {
+    if (this.pomodoroIsRunning) {
+      return;
+    }
+
+    if (this.pomodoroSecondsRemaining <= 0) {
+      this.pomodoroSecondsRemaining = this.pomodoroMode === 'focus'
+        ? 25 * 60
+        : 5 * 60;
+    }
+
+    this.pomodoroIsRunning = true;
+    this.pomodoroMessage = this.pomodoroMode === 'focus'
+      ? 'Stay focused. You are doing great.'
+      : 'Relax. Your next focus session is coming up.';
+
+    this.pomodoroInterval = setInterval(() => {
+      if (this.pomodoroSecondsRemaining > 0) {
+        this.pomodoroSecondsRemaining -= 1;
+      }
+
+      if (this.pomodoroSecondsRemaining <= 0) {
+        this.completePomodoroSession();
+      }
+
+      this.cdr.markForCheck();
+    }, 1000);
+  }
+
+  pausePomodoro(): void {
+    this.clearPomodoroInterval();
+    this.pomodoroIsRunning = false;
+    this.pomodoroMessage = 'Timer paused. Resume whenever you are ready.';
+  }
+
+  resetPomodoro(): void {
+    this.pausePomodoro();
+    this.pomodoroSecondsRemaining = this.pomodoroMode === 'focus'
+      ? 25 * 60
+      : 5 * 60;
+    this.pomodoroMessage = 'Timer reset. Ready when you are.';
+  }
+
+  private completePomodoroSession(): void {
+    this.clearPomodoroInterval();
+    this.pomodoroIsRunning = false;
+
+    if (this.pomodoroMode === 'focus') {
+      this.pomodoroCompletedSessions += 1;
+      this.pomodoroMode = 'break';
+      this.pomodoroSecondsRemaining = 5 * 60;
+      this.pomodoroMessage = 'Focus session complete! Take a 5-minute break.';
+    } else {
+      this.pomodoroMode = 'focus';
+      this.pomodoroSecondsRemaining = 25 * 60;
+      this.pomodoroMessage = 'Break complete. Ready for another focus session?';
+    }
+  }
+
+  private clearPomodoroInterval(): void {
+    if (this.pomodoroInterval !== null) {
+      clearInterval(this.pomodoroInterval);
+      this.pomodoroInterval = null;
+    }
+    this.pomodoroIsRunning = false;
+  }
+
+
+  // ===================================================
+  // MUSIC ASSISTANT PROMPTS
+  // ===================================================
+
+  askMusicPrompt(prompt: string): void {
+    this.workspaceMode = 'music';
+    this.message = prompt;
+    this.sendMessage();
+  }
+
+
+  // ===================================================
+  // FORMAT MARKDOWN FOR THE CHAT DISPLAY
+  // ===================================================
+
+  formatMessageContent(content: string): string {
+    if (!content) {
+      return '';
+    }
+
+    const cleanInline = (value: string): string => value
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/__(.*?)__/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/_(.*?)_/g, '$1')
+      .replace(/~~(.*?)~~/g, '$1')
+      .replace(/[#*`]/g, '')
+      .trim();
+
+    const lines = content.replace(/\r/g, '').split('\n');
+    const output: string[] = [];
+    let insideCodeBlock = false;
+
+    for (const line of lines) {
+      if (/^\s*```/.test(line)) {
+        insideCodeBlock = !insideCodeBlock;
+        continue;
+      }
+
+      if (insideCodeBlock) {
+        output.push(line);
+        continue;
+      }
+
+      const trimmed = line.trim();
+
+      // Remove Markdown table separator rows.
+      if (/^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(trimmed)) {
+        continue;
+      }
+
+      // Convert Markdown table rows into readable text.
+      if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+        const cells = trimmed.slice(1, -1)
+          .split('|')
+          .map(cell => cleanInline(cell))
+          .filter(Boolean);
+
+        if (cells.length) {
+          output.push(cells.join('  —  '));
+        }
+        continue;
+      }
+
+      const listLine = line
+        .replace(/^\s*[-*+]\s+/, '• ')
+        .replace(/^\s*\d+[.)]\s+/, match => `${match.trim()} `)
+        .replace(/^\s{0,3}#{1,6}\s+/, '')
+        .replace(/^\s*>\s?/, '')
+        .replace(/^\s*[-*_]{3,}\s*$/, '');
+
+      output.push(cleanInline(listLine));
+    }
+
+    return output
+      .join('\n')
+      .replace(/[ \t]+\n/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
 
   // ===================================================
   // SCROLL TO THE LATEST CHAT MESSAGE
@@ -2520,6 +3311,10 @@ getCurrentConversationTitle(): string {
 
 sendMessage(): void {
 
+  if (this.workspaceMode === 'home') {
+    this.workspaceMode = 'chat';
+  }
+
   const message =
     this.message.trim();
 
@@ -2853,6 +3648,8 @@ openConversation(
   this.conversationId =
     conversation.id;
 
+  this.workspaceMode = 'chat';
+  this.activeStudyTool = null;
 
   // -----------------------------------------------
   // Set chat type
@@ -3147,6 +3944,11 @@ openConversation(
 
 newChat(): void {
 
+  this.workspaceMode = 'home';
+  this.activeStudyTool = null;
+  this.studyToolNotice = '';
+  this.speakNextVoiceReply = false;
+
   // -----------------------------------------------
   // Leave group room
   // -----------------------------------------------
@@ -3233,124 +4035,6 @@ newChat(): void {
       });
 
   }
-  
-/**
- * Convert Markdown responses to clean, readable plain text
- * for displaying in the chat UI.
- */
-formatMessageContent(content: string): string {
-
-  if (!content) {
-    return '';
-  }
-
-  const cleanInline = (value: string): string => {
-
-    return value
-      // Images: keep the alt text
-      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
-
-      // Links: keep the visible link text
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-
-      // Inline code
-      .replace(/`([^`]+)`/g, '$1')
-
-      // Bold and italic
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      .replace(/__(.*?)__/g, '$1')
-      .replace(/\*(.*?)\*/g, '$1')
-      .replace(/_(.*?)_/g, '$1')
-
-      // Strikethrough
-      .replace(/~~(.*?)~~/g, '$1')
-
-      // Headings and blockquotes
-      .replace(/^\s{0,3}#{1,6}\s+/g, '')
-      .replace(/^\s*>\s?/g, '')
-
-      // Horizontal separators
-      .replace(/^\s*[-*_]{3,}\s*$/g, '')
-
-      // Remove Markdown symbols that remain
-      .replace(/[#*`|]/g, '')
-
-      .trim();
-  };
-
-
-  const lines =
-    content.replace(/\r/g, '').split('\n');
-
-  const output: string[] = [];
-
-  let insideCodeBlock = false;
-
-  for (const line of lines) {
-
-    // Preserve code content but remove Markdown fences.
-    if (/^\s*```/.test(line)) {
-
-      insideCodeBlock = !insideCodeBlock;
-
-      continue;
-    }
-
-    if (insideCodeBlock) {
-
-      output.push(line);
-
-      continue;
-    }
-
-    // Remove Markdown table separator rows.
-    if (
-      /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/
-        .test(line)
-    ) {
-      continue;
-    }
-
-    // Convert Markdown table rows into readable lines.
-    const trimmed = line.trim();
-
-    if (
-      trimmed.startsWith('|') &&
-      trimmed.endsWith('|')
-    ) {
-
-      const cells = trimmed
-        .slice(1, -1)
-        .split('|')
-        .map(cell => cleanInline(cell))
-        .filter(Boolean);
-
-      if (cells.length) {
-        output.push(cells.join(' — '));
-      }
-
-      continue;
-    }
-
-    let cleaned = line
-      // Numbered list markers
-      .replace(/^\s*\d+[.)]\s+/, '')
-
-      // Markdown bullet markers become normal bullet points
-      .replace(/^\s*[-*+]\s+/, '• ');
-
-    cleaned = cleanInline(cleaned);
-
-    output.push(cleaned);
-  }
-
-  return output
-    .join('\n')
-    .replace(/[ \t]+\n/g, '\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-}
-
 
 
   // ===================================================
